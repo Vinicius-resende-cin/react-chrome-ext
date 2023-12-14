@@ -1,0 +1,1 @@
+(()=>{"use strict";chrome.tabs.onUpdated.addListener(((t,e,r)=>{if("complete"===e.status){if(void 0===r.url)throw new Error("tab.url is undefined");null!==r.url.match(/^https:\/\/github\.com\/.+\/.+\/pull\/\d+\/files.*$/)&&(console.log("Listener called at: "+r.url),chrome.scripting.executeScript({target:{tabId:t},files:["./js/content.js"]}))}}))})();

@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "name": "React Chrome Extension",
+  "description": "This is a Chrome extension built with React and TypeScript",
+  "action": {
+    "default_popup": "js/index.html",
+    "default_title": "React Chrome Extension"
+  },
+  "permissions": ["activeTab", "scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
