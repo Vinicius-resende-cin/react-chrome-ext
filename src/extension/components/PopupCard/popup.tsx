@@ -12,10 +12,11 @@ import { useState } from "react";
 interface PopupProps {
   lineNumber: number;
   lineUrl: string;
+  filename: string;
   isSource: boolean;
 }
 
-export default function Popup({ lineNumber, lineUrl, isSource }: PopupProps) {
+export default function Popup({ lineNumber, lineUrl, filename, isSource }: PopupProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { refs, floatingStyles, context } = useFloating({
@@ -50,7 +51,7 @@ export default function Popup({ lineNumber, lineUrl, isSource }: PopupProps) {
           style={floatingStyles}
           {...getFloatingProps()}>
           This is the {isSource ? "source" : "sink"} for line&nbsp;
-          <a href={`#${lineUrl}`}>{lineNumber}</a>
+          <a href={`#${lineUrl}`}>{lineNumber}</a> of file {filename}
         </div>
       )}
     </>
