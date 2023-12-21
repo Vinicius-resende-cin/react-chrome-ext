@@ -68,3 +68,13 @@ export function getLineIndex(lineList: NodeListOf<Element>, lineNumber: number) 
   }
   return null;
 }
+
+/**
+ * Retrieves the HTML table cell element containing the text of a line in a GitHub file.
+ *
+ * @param line - The HTML element representing a line in the file.
+ * @returns The HTML table cell element containing the text of the line.
+ */
+export function getLineTextCell(line: Element) {
+  return line.querySelector("td.js-file-line") as HTMLTableCellElement;
+}
