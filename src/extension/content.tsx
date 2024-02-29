@@ -1,22 +1,34 @@
 import { Dependency, DependencyNode } from "./utils/Dependency";
+import AnalysisOutput from "../models/AnalysisOutput";
 import "./content.css";
 
-function main() {
-  const filename = "src/main/java/br/unb/cic/analysis/AbstractMergeConflictDefinition.java";
-  const filename2 = "src/main/java/br/unb/cic/analysis/Main.java";
+function injectDependencies(analysis: AnalysisOutput) {
+  const dependencies = analysis.getDependencies();
 
-  const sourceNode: DependencyNode = {
-    filepath: filename,
-    line: 106
-  };
+  dependencies.forEach((dep) => {
+    const filenamePrefix = "src/main/java/";
+    const fromClassFile = filenamePrefix + dep.from.className.replaceAll(".", "/") + ".java";
+    const toClassFile = filenamePrefix + dep.to.className.replaceAll(".", "/") + ".java";
 
-  const sinkNode: DependencyNode = {
-    filepath: filename2,
-    line: 304
-  };
+    const fromLine = dep.from.lineNumber;
+    const toLine = dep.to.lineNumber;
 
-  const dep1: Dependency = new Dependency(sourceNode, sinkNode);
-  dep1.show();
+    const fromNode: DependencyNode = {
+      filepath: fromClassFile,
+      line: fromLine
+    };
+
+    const toNode: DependencyNode = {
+      filepath: toClassFile,
+      line: toLine
+    };
+
+    const dep1: Dependency = new Dependency(fromNode, toNode);
+    dep1.show();
+  });
 }
 
-main();
+chrome.storage.local.get("analysis", (result) => {
+  const analysisOutput = new AnalysisOutput(result.analysis);
+  injectDependencies(analysisOutput);
+});

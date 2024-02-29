@@ -51,6 +51,10 @@ class AnalysisOutput implements IAnalysisOutput {
     this.pull_number = analysisOutput.pull_number;
     this.results = analysisOutput.results;
   }
+
+  public getDependencies(): dependency[] {
+    return this.results.flatMap((result) => result.dependencies);
+  }
 }
 
 export default AnalysisOutput;
