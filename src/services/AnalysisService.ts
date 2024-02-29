@@ -7,7 +7,12 @@ class AnalysisService {
       `${analysisAPI}/analysis?owner=${owner}&repo=${repo}&pull_number=${pull_number}`
     )
       .then((response) => response.json())
-      .then((data) => new AnalysisOutput(data));
+      .then((data) => new AnalysisOutput(data))
+      .catch((error) => console.error(error));
+
+    if (!analysis) throw new Error("Analysis not found");
     return analysis;
   }
 }
+
+export default AnalysisService;
