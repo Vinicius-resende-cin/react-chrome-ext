@@ -20,9 +20,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeinfo, tab) => {
   const owner = urlMatch[1];
   const repository = urlMatch[2];
   const pull_number = parseInt(urlMatch[3]);
-  console.log("Owner: " + owner);
-  console.log("Repository: " + repository);
-  console.log("Pull number: " + pull_number);
 
   // Execute the content script
   await getAnalysisOutput(owner, repository, pull_number).then((analysis) => {
