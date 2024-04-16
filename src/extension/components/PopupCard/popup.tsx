@@ -8,15 +8,26 @@ import {
   useDismiss
 } from "@floating-ui/react";
 import { useState } from "react";
+import { DependencyNode } from "../../utils/Dependency";
 
 interface PopupProps {
-  lineNumber: number;
-  lineUrl: string;
+  analysis: string;
+  type: string;
   filename: string;
-  isSource: boolean;
+  relatedNodes: DependencyNode[];
 }
 
-export default function Popup({ lineNumber, lineUrl, filename, isSource }: PopupProps) {
+const createNodeMessage = (node: DependencyNode) => {
+  const url = node.getLineUrl();
+  if (!url) return `${node.filepath}:${node.line}`;
+  return (
+    <a href={url}>
+      {node.filepath}:{node.line}
+    </a>
+  );
+};
+
+export default function Popup({ analysis, type, filename, relatedNodes }: PopupProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { refs, floatingStyles, context } = useFloating({
@@ -26,6 +37,8 @@ export default function Popup({ lineNumber, lineUrl, filename, isSource }: Popup
     open: isOpen,
     onOpenChange: setIsOpen
   });
+
+  floatingStyles.zIndex = 9999;
 
   const click = useClick(context);
   const dismiss = useDismiss(context, { escapeKey: false });
@@ -45,13 +58,14 @@ export default function Popup({ lineNumber, lineUrl, filename, isSource }: Popup
       />
 
       {isOpen && (
-        <div
-          id="popup-content"
-          ref={refs.setFloating}
-          style={floatingStyles}
-          {...getFloatingProps()}>
-          This is the {isSource ? "source" : "sink"} for line&nbsp;
-          <a href={`#${lineUrl}`}>{lineNumber}</a> of file {filename}
+        <div id="popup-content" ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()}>
+          Found {analysis} ({type}) conflict.
+          <br />
+          <b>Related nodes:</b>
+          <br />
+          {relatedNodes.map((node) => (
+            <span key={node.filepath + node.line}>{createNodeMessage(node)}</span>
+          ))}
         </div>
       )}
     </>

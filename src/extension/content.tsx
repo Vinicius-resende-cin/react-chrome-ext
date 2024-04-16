@@ -1,30 +1,15 @@
-import { Dependency, DependencyNode } from "./utils/Dependency";
 import AnalysisOutput from "../models/AnalysisOutput";
 import "./content.css";
+import { Dependency } from "./utils/Dependency";
 
 function injectDependencies(analysis: AnalysisOutput) {
   const dependencies = analysis.getDependencies();
 
   dependencies.forEach((dep) => {
-    const filenamePrefix = "src/main/java/";
-    const fromClassFile = filenamePrefix + dep.from.className.replaceAll(".", "/") + ".java";
-    const toClassFile = filenamePrefix + dep.to.className.replaceAll(".", "/") + ".java";
+    const nodes = dep.body.interference;
+    const dependency = new Dependency(nodes);
 
-    const fromLine = dep.from.lineNumber;
-    const toLine = dep.to.lineNumber;
-
-    const fromNode: DependencyNode = {
-      filepath: fromClassFile,
-      line: fromLine
-    };
-
-    const toNode: DependencyNode = {
-      filepath: toClassFile,
-      line: toLine
-    };
-
-    const dep1: Dependency = new Dependency(fromNode, toNode);
-    dep1.show();
+    dependency.show(dep.type);
   });
 }
 

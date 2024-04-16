@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import Popup from "../components/PopupCard/popup";
+import { DependencyNode } from "./Dependency";
 
 const POPUP_ROOT_ID = "dependency-alert-popup-root";
 
@@ -23,10 +24,10 @@ export function createPopupRoot() {
  */
 export function insertPopup(
   lineElement: HTMLElement,
-  lineNumber: number,
-  lineUrl: string,
+  analysis: string,
+  type: string,
   fileName: string,
-  isSource: boolean = true
+  relatedNodes: DependencyNode[]
 ) {
   lineElement.querySelector(`#${POPUP_ROOT_ID}`)?.remove();
 
@@ -37,7 +38,7 @@ export function insertPopup(
   root.render(
     <React.StrictMode>
       <span className="pl-2" />
-      <Popup lineNumber={lineNumber} lineUrl={lineUrl} filename={fileName} isSource={isSource} />
+      <Popup analysis={analysis} type={type} filename={fileName} relatedNodes={relatedNodes} />
     </React.StrictMode>
   );
 }
