@@ -70,6 +70,15 @@ export function getLineIndex(lineList: NodeListOf<Element>, lineNumber: number) 
 }
 
 /**
+ * Returns the DOM element of the text cell in the line.
+ * @param line The line to search in.
+ * @returns The DOM element of the text cell.
+ */
+export function getLineElement(lineNumber: number, fileDiff: Element) {
+  return fileDiff.querySelector(`tr:has(:nth-child(2):is(td[id="${fileDiff.id}R${lineNumber}"])`);
+}
+
+/**
  * Retrieves the HTML table cell element containing the text of a line in a GitHub file.
  *
  * @param line - The HTML element representing a line in the file.
