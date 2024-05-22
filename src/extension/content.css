@@ -1,6 +1,3 @@
-#popup-content {
-  padding: 2px 5px 2px 5px;
-  background-color: burlywood;
-  color: black;
-  border: 1px solid black;
+.dependencies-analysis-extension:has(header.AppHeader) #repository-container-header {
+  display: none;
 }

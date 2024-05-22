@@ -34,10 +34,7 @@ module.exports = {
   plugins: [
     new Dotenv(),
     new CopyPlugin({
-      patterns: [
-        { from: "manifest.json", to: "../manifest.json" },
-        { from: "public/alert-icon.png", to: "../assets/alert-icon.png" }
-      ]
+      patterns: [{ from: "manifest.json", to: "../manifest.json" }]
     }),
     ...getHtmlPlugins(["index"])
   ],

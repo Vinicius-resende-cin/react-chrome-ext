@@ -12,25 +12,30 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeinfo, tab) => {
 
   // Filter the url to only run on PR files page
   if (tab.url === undefined) throw new Error("tab.url is undefined");
-  const urlMatch = tab.url.match(/^https:\/\/github\.com\/(.+)\/(.+)\/pull\/(\d+)\/files.*$/);
+  const urlMatch = tab.url.match(/^https:\/\/github\.com\/(.+)\/(.+)\/pull\/(\d+).*$/);
   if (urlMatch === null) return;
 
   console.log("Listener called at: " + tab.url);
 
-  const owner = urlMatch[1];
-  const repository = urlMatch[2];
-  const pull_number = parseInt(urlMatch[3]);
+  // const owner = urlMatch[1];
+  // const repository = urlMatch[2];
+  // const pull_number = parseInt(urlMatch[3]);
+
+  chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    files: ["./js/content.js"]
+  });
 
   // Execute the content script
-  await getAnalysisOutput(owner, repository, pull_number).then((analysis) => {
-    chrome.storage.local.set({ analysis: analysis }, () => {
-      // Execute the content script
-      chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ["./js/content.js"]
-      });
-    });
-  });
+  // await getAnalysisOutput(owner, repository, pull_number).then((analysis) => {
+  //   chrome.storage.local.set({ analysis: analysis }, () => {
+  //     // Execute the content script
+  //     chrome.scripting.executeScript({
+  //       target: { tabId: tabId },
+  //       files: ["./js/content.js"]
+  //     });
+  //   });
+  // });
 });
 
 export {};
