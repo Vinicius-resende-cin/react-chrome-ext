@@ -7,8 +7,8 @@
     "default_popup": "js/index.html",
     "default_title": "React Chrome Extension"
   },
-  "permissions": ["activeTab", "scripting", "tabs", "storage"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["activeTab", "scripting", "webNavigation"],
+  "host_permissions": ["https://github.com/*"],
   "background": {
     "service_worker": "js/background.js"
   },

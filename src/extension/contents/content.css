@@ -1,0 +1,3 @@
+.dependencies-analysis-extension:has(header.AppHeader) #repository-container-header {
+  display: none;
+}

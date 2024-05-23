@@ -7,7 +7,7 @@ module.exports = {
   entry: {
     index: "./src/app/index.tsx",
     background: "./src/extension/background.ts",
-    content: "./src/extension/content.tsx"
+    navtab: "./src/extension/contents/navtab.tsx"
   },
   mode: "production",
   module: {
@@ -34,7 +34,10 @@ module.exports = {
   plugins: [
     new Dotenv(),
     new CopyPlugin({
-      patterns: [{ from: "manifest.json", to: "../manifest.json" }]
+      patterns: [
+        { from: "manifest.json", to: "../manifest.json" },
+        { from: "src/extension/contents/*.css", to: "../js/[name].css" }
+      ]
     }),
     ...getHtmlPlugins(["index"])
   ],
