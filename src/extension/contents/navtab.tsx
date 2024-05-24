@@ -1,11 +1,6 @@
 import "./content.css";
 
-// get url match
-const urlMatch = window.location.href.match(/^(https:\/\/github\.com\/.+\/.+\/pull\/\d+).*$/);
-if (urlMatch === null) throw new Error("urlMatch is null");
-const baseUrl = urlMatch[1];
-
-const DEPENDENCIES_URL = `${baseUrl}/files#dependencies`;
+const DEPENDENCIES_URL = `#dependencies`;
 
 // add class to html element
 const html = document.querySelector("html")!;
@@ -26,6 +21,12 @@ if (existingTab !== null) {
   tab.classList.add("flex-shrink-0");
   tab.href = DEPENDENCIES_URL;
   tab.innerHTML = "Dependencies";
+
+  // sends a message to the extension when clicked
+  tab.addEventListener("click", async () => {
+    const response = await chrome.runtime.sendMessage({ message: "goto-dependencies" });
+    console.log(response);
+  });
 
   nav.appendChild(tab);
 }

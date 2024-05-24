@@ -7,7 +7,8 @@ module.exports = {
   entry: {
     index: "./src/app/index.tsx",
     background: "./src/extension/background.ts",
-    navtab: "./src/extension/contents/navtab.tsx"
+    navtab: "./src/extension/contents/navtab.tsx",
+    navcontent: "./src/extension/contents/navcontent.tsx"
   },
   mode: "production",
   module: {
