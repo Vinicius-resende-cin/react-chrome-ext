@@ -43,4 +43,10 @@ content.classList.add("is-visible");
 content.innerHTML = `<h1>New tab works!</h1>`;
 navParent.insertAdjacentElement("afterend", content);
 
+// send a message to the background script to
+(async () => {
+  const response = await chrome.runtime.sendMessage({ message: "dependencies-root-ready" });
+  console.log(response);
+})();
+
 export {};

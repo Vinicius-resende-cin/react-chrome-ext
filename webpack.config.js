@@ -7,8 +7,9 @@ module.exports = {
   entry: {
     index: "./src/app/index.tsx",
     background: "./src/extension/background.ts",
-    navtab: "./src/extension/contents/navtab.tsx",
-    navcontent: "./src/extension/contents/navcontent.tsx"
+    "insert-nav-tab": "./src/extension/content-scripts/insert-nav-tab.ts",
+    "insert-nav-content-root": "./src/extension/content-scripts/insert-nav-content-root.ts",
+    "insert-nav-content": "./src/extension/content-scripts/insert-nav-content.tsx"
   },
   mode: "production",
   module: {
@@ -37,7 +38,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: "manifest.json", to: "../manifest.json" },
-        { from: "src/extension/contents/*.css", to: "../js/[name].css" }
+        { from: "src/extension/content-scripts/*.css", to: "../js/[name].css" }
       ]
     }),
     ...getHtmlPlugins(["index"])

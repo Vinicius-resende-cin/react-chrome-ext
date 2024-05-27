@@ -1,5 +1,3 @@
-import "./content.css";
-
 const DEPENDENCIES_URL = `#dependencies`;
 
 // add class to html element

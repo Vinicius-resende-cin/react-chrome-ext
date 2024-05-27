@@ -1,11 +1,3 @@
-import AnalysisService from "../services/AnalysisService";
-
-const analysisService = new AnalysisService();
-
-async function getAnalysisOutput(owner: string, repository: string, pull_number: number) {
-  return await analysisService.getAnalysisOutput(owner, repository, pull_number);
-}
-
 /**
  * Inserts the new tab button.
  * @param tabId the id of the tab to insert the button
@@ -22,10 +14,10 @@ function insertNavTab(tabId: number) {
 }
 
 /**
- * Inserts the content of the tab.
+ * Inserts the content root element of the tab.
  * @param tabId the id of the tab to insert the content
  */
-function insertTabContent(tabId: number) {
+function insertTabContentRoot(tabId: number) {
   chrome.scripting.executeScript(
     {
       target: { tabId: tabId },
@@ -35,8 +27,37 @@ function insertTabContent(tabId: number) {
   );
 }
 
+/**
+ * Inserts the content of the tab.
+ * @param tabId the id of the tab to insert the content
+ */
+function insertTabContent(tabId: number) {
+  chrome.scripting.executeScript(
+    {
+      target: { tabId: tabId },
+      files: ["./js/insert-nav-content.js"]
+    },
+    () => console.log("Dependencies tab content inserted")
+  );
+}
+
+/**
+ * Loads the CSS file.
+ * @param tabId the id of the tab to load the CSS
+ */
+function loadCSS(tabId: number) {
+  chrome.scripting.insertCSS(
+    {
+      target: { tabId: tabId },
+      files: ["./js/content.css"]
+    },
+    () => console.log("CSS loaded")
+  );
+}
+
 // Listen for changes in the Hystory (event happens after DOM is loaded and doesnt fail when the page is loaded dynamically)
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+  loadCSS(details.tabId);
   insertNavTab(details.tabId);
 });
 
@@ -51,9 +72,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // Check if the message is valid
   if (request.message === "goto-dependencies") {
-    // Insert the tab content
-    insertTabContent(tabId);
+    // Insert the tab content root
+    insertTabContentRoot(tabId);
     sendResponse({ message: "Navigating to dependencies tab" });
+  } else if (request.message === "dependencies-root-ready") {
+    // Insert the content of the tab
+    insertTabContent(tabId);
+    sendResponse({ message: "Dependencies content inserted" });
   } else {
     sendResponse({ message: "Invalid message" });
   }
