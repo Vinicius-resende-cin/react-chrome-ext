@@ -11,9 +11,47 @@ type interferenceTypeList = {
   };
 };
 
+type eventTypeList = {
+  OA: {
+    INTRA: {
+      LR: "leftRightOAIntra";
+      RL: "rightLeftOAIntra";
+    };
+    INTER: {
+      LR: "leftRightOAInter";
+      RL: "rightLeftOAInter";
+    };
+  };
+};
+
 type Flatten<T> = T extends object ? T[keyof T] : T;
 
 type interferenceType = Flatten<Flatten<interferenceTypeList>>;
+type eventType = Flatten<Flatten<Flatten<eventTypeList>>>;
+
+export const interferenceTypes: interferenceTypeList = {
+  OA: {
+    DECLARATION: "declaration",
+    OVERRIDE: "override"
+  },
+  DEFAULT: {
+    SOURCE: "source",
+    SINK: "sink"
+  }
+};
+
+export const eventTypes: eventTypeList = {
+  OA: {
+    INTRA: {
+      LR: "leftRightOAIntra",
+      RL: "rightLeftOAIntra"
+    },
+    INTER: {
+      LR: "leftRightOAInter",
+      RL: "rightLeftOAInter"
+    }
+  }
+};
 
 // Define the types of the analysis output
 
@@ -32,8 +70,8 @@ export type interferenceNode = {
   stackTrace?: Array<lineLocation>;
 };
 
-type dependency = {
-  type: string;
+export type dependency = {
+  type: eventType;
   label: string;
   body: {
     description: string;
