@@ -37,6 +37,7 @@ oldContent.remove();
 
 // insert a new div with the content
 const content = document.createElement("div");
+content.id = "dependencies-content-root";
 content.classList.add("pull-request-tab-content");
 content.classList.add("is-visible");
 content.innerHTML = `<h1>New tab works!</h1>`;
