@@ -55,8 +55,21 @@ function loadCSS(tabId: number) {
   );
 }
 
+/**
+ * Checks if the url is a github pull request.
+ * @param url the url to check
+ * @returns true if the url is a github pull request, false otherwise
+ */
+function isUrlGithubPullRequest(url: string): boolean {
+  const urlRegex = /^https:\/\/github.com\/.*\/pull\/\d+.*$/;
+  return urlRegex.test(url);
+}
+
 // Listen for changes in the Hystory (event happens after DOM is loaded and doesnt fail when the page is loaded dynamically)
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+  // Check if the url is a github pull request
+  if (!isUrlGithubPullRequest(details.url)) return;
+
   loadCSS(details.tabId);
   insertNavTab(details.tabId);
 });
