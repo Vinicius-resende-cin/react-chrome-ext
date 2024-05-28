@@ -5,9 +5,14 @@ import DependencyView from "../components/DependencyView";
 const rootElement = document.querySelector("#dependencies-content-root");
 if (rootElement === null) throw new Error("Root not found");
 
-const owner = "";
-const repository = "";
-const pull_number = 0;
+// get the owner, repository and pull_number from the url
+const url = window.location.href;
+const urlRegex = /^https:\/\/github.com\/(.*)\/(.*)\/pull\/(\d+).*$/;
+const match = url.match(urlRegex);
+if (match === null) throw new Error("Invalid url");
+const owner = match[1];
+const repository = match[2];
+const pull_number = Number(match[3]);
 
 const root = createRoot(rootElement);
 root.render(
