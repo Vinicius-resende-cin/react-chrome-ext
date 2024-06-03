@@ -113,4 +113,8 @@ export default class AnalysisOutput implements IAnalysisOutput {
   public getDependencies(): dependency[] {
     return this.events;
   }
+
+  public getDiff(): string {
+    return this.diff;
+  }
 }

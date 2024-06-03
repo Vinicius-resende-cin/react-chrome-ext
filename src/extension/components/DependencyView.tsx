@@ -17,15 +17,29 @@ interface DependencyViewProps {
 
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
   const [dependencies, setDependencies] = useState<dependency[]>([]);
+  const [diff, setDiff] = useState<string>("");
 
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
       setDependencies(response.getDependencies());
+      setDiff(response.getDiff());
     });
   }, [owner, repository, pull_number]);
 
   return (
     <>
+      {diff ? (
+        <div id="diff-container" className="mb-3">
+          <h1>Diff</h1>
+          <pre>{diff}</pre>
+        </div>
+      ) : (
+        <div id="no-analysis" className="mb-3">
+          <p>Não foi encontrado nenhum registro de execução das análises...</p>
+          <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
+        </div>
+      )}
+
       {dependencies.length ? (
         <div id="dependency-container">
           <h1>Dependencies</h1>
@@ -39,12 +53,11 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             )}
           />
         </div>
-      ) : (
-        <div id="no-analysis">
-          <p>Não foi encontrado nenhum registro de execução das análises...</p>
-          <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
+      ) : diff ? (
+        <div id="no-dependencies">
+          <p>Não foram encontradas dependências durante as análises.</p>
         </div>
-      )}
+      ) : null}
     </>
   );
 }
