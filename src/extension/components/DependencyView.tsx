@@ -45,11 +45,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           <h1>Dependencies</h1>
           <OADependencySection
             dependencies={dependencies.filter(
-              (d) =>
-                d.type === eventTypes.OA.INTER.LR ||
-                d.type === eventTypes.OA.INTER.RL ||
-                d.type === eventTypes.OA.INTRA.LR ||
-                d.type === eventTypes.OA.INTRA.RL
+              (d) => d.type === eventTypes.OA.INTER || d.type === eventTypes.OA.INTRA
             )}
           />
         </div>

@@ -13,14 +13,8 @@ type interferenceTypeList = {
 
 type eventTypeList = {
   OA: {
-    INTRA: {
-      LR: "leftRightOAIntra";
-      RL: "rightLeftOAIntra";
-    };
-    INTER: {
-      LR: "leftRightOAInter";
-      RL: "rightLeftOAInter";
-    };
+    INTRA: "OAINTRA";
+    INTER: "OAINTER";
   };
 };
 
@@ -42,14 +36,8 @@ export const interferenceTypes: interferenceTypeList = {
 
 export const eventTypes: eventTypeList = {
   OA: {
-    INTRA: {
-      LR: "leftRightOAIntra",
-      RL: "rightLeftOAIntra"
-    },
-    INTER: {
-      LR: "leftRightOAInter",
-      RL: "rightLeftOAInter"
-    }
+    INTRA: "OAINTRA",
+    INTER: "OAINTER"
   }
 };
 
@@ -67,7 +55,7 @@ export type interferenceNode = {
   branch: "L" | "R";
   text: string;
   location: lineLocation;
-  stackTrace?: Array<lineLocation>;
+  stackTrace?: Array<string>;
 };
 
 export type dependency = {
