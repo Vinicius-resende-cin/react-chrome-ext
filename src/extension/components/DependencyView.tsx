@@ -1,9 +1,20 @@
-import { useEffect, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import OADependencySection from "./OADependencySection";
 import AnalysisService from "../../services/AnalysisService";
 import { dependency, eventTypes } from "../../models/AnalysisOutput";
+import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
+import { ColorSchemeType } from "diff2html/lib/types";
 
 const analysisService = new AnalysisService();
+
+const diffConfig: Diff2HtmlConfig = {
+  outputFormat: "line-by-line",
+  drawFileList: true,
+  renderNothingWhenEmpty: true,
+  matching: "words",
+  diffStyle: "word",
+  colorScheme: ColorSchemeType.AUTO
+};
 
 async function getAnalysisOutput(owner: string, repository: string, pull_number: number) {
   return await analysisService.getAnalysisOutput(owner, repository, pull_number);
@@ -31,7 +42,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       {diff ? (
         <div id="diff-container" className="mb-3">
           <h1>Diff</h1>
-          <pre>{diff}</pre>
+          {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
         </div>
       ) : (
         <div id="no-analysis" className="mb-3">
