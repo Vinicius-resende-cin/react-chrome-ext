@@ -5,32 +5,30 @@ interface OADependencySectionProps {
 }
 
 export default function OADependencySection({ dependencies }: OADependencySectionProps) {
-  return (
-    <>
-      {dependencies.length && (
-        <div id="oa-dependency-container">
-          {dependencies.map((d, i) => (
-            <div key={i}>
-              <h2>{d.label}</h2>
-              <p>{d.body.description}</p>
-              <ul>
-                {d.body.interference.map((i, j) => (
-                  <li key={j}>
-                    <p>{i.text}</p>
-                    <p>
-                      {i.location.file}:{i.location.line}
-                    </p>
-                    <p>
-                      {i.location.class}:{i.location.method.replace("()", "")}
-                      {"()"}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+  return dependencies.length ? (
+    <div id="oa-dependency-container">
+      {dependencies.map((d, i) => (
+        <div key={i} className="mb-3">
+          <h2>{d.label}</h2>
+          <p>{d.body.description}</p>
+          <ul>
+            {[d.body.interference[0], d.body.interference[d.body.interference.length - 1]].map((i, j) => (
+              <li key={j} className={j % 2 === 1 ? "text-gray-200" : "text-orange-500"}>
+                <p>{i.text}</p>
+                <p>
+                  {i.location.file !== "UNKNOWN" ? i.location.file : i.location.class}:{i.location.line}
+                </p>
+                <p>
+                  {i.location.class}:{i.location.method.replace("()", "")}
+                  {"()"}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
-    </>
+      ))}
+    </div>
+  ) : (
+    <></>
   );
 }
