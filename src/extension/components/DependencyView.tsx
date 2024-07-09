@@ -4,6 +4,7 @@ import AnalysisService from "../../services/AnalysisService";
 import { dependency, eventTypes } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
+import DFDependencySection from "./DFDependencySection";
 
 const analysisService = new AnalysisService();
 
@@ -57,6 +58,14 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           <OADependencySection
             dependencies={dependencies.filter(
               (d) => d.type === eventTypes.OA.INTER || d.type === eventTypes.OA.INTRA
+            )}
+          />
+          <DFDependencySection
+            dependencies={dependencies.filter(
+              (d) =>
+                d.type === eventTypes.DF.INTER ||
+                d.type === eventTypes.DF.INTRA ||
+                d.type === eventTypes.DEFAULT
             )}
           />
         </div>

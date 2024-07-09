@@ -16,6 +16,11 @@ type eventTypeList = {
     INTRA: "OAINTRA";
     INTER: "OAINTER";
   };
+  DF: {
+    INTRA: "DFINTRA";
+    INTER: "DFINTER";
+  };
+  DEFAULT: "CONFLICT";
 };
 
 type Flatten<T> = T extends object ? T[keyof T] : T;
@@ -38,7 +43,12 @@ export const eventTypes: eventTypeList = {
   OA: {
     INTRA: "OAINTRA",
     INTER: "OAINTER"
-  }
+  },
+  DF: {
+    INTRA: "DFINTRA",
+    INTER: "DFINTER"
+  },
+  DEFAULT: "CONFLICT"
 };
 
 // Define the types of the analysis output
