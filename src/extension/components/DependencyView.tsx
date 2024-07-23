@@ -58,7 +58,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         for (let modLine of modifiedLines) {
           const modLineFile = modLine.file;
 
-          // get the line element
+          // get the diff element of the file
           const diffContent = Array.from(diffFiles).filter((diffFile) => {
             const fileName = diffFile.querySelector(".d2h-file-name")?.textContent;
             return fileName?.endsWith(modLineFile);

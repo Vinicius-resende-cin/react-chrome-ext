@@ -807,3 +807,7 @@
   --tw-text-opacity: 1 !important;
   color: rgb(249 115 22 / var(--tw-text-opacity)) /* #f97316 */ !important;
 }
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
