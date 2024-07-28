@@ -1,10 +1,8 @@
 import { createElement, useEffect, useState } from "react";
-import OADependencySection from "./OADependencySection";
 import AnalysisService from "../../services/AnalysisService";
-import { dependency, eventTypes } from "../../models/AnalysisOutput";
+import { dependency } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
-import DFDependencySection from "./DFDependencySection";
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
