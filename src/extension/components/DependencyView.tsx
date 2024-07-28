@@ -5,6 +5,7 @@ import { dependency, eventTypes } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
 import DFDependencySection from "./DFDependencySection";
+import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
 
@@ -105,20 +106,19 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     <>
       {dependencies.length ? (
         <div id="dependency-container">
-          <h1>Dependencies</h1>
-          <OADependencySection
-            dependencies={dependencies.filter(
-              (d) => d.type === eventTypes.OA.INTER || d.type === eventTypes.OA.INTRA
-            )}
-          />
-          <DFDependencySection
-            dependencies={dependencies.filter(
-              (d) =>
-                d.type === eventTypes.DF.INTER ||
-                d.type === eventTypes.DF.INTRA ||
-                d.type === eventTypes.DEFAULT
-            )}
-          />
+          <h3 className="text-red-600">
+            {dependencies.length} conflito{dependencies.length > 1 ? "s" : ""} identificado
+            {dependencies.length > 1 ? "s" : ""}:
+          </h3>
+          <ul>
+            {dependencies.map((d, i) => {
+              return (
+                <li>
+                  <Conflict key={i} dependency={d} />
+                </li>
+              );
+            })}
+          </ul>
         </div>
       ) : diff ? (
         <div id="no-dependencies">

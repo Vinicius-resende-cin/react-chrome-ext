@@ -803,9 +803,19 @@
   color: rgb(229 231 235 / var(--tw-text-opacity)) /* #e5e7eb */ !important;
 }
 
+.text-gray-400 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(156 163 175 / var(--tw-text-opacity)) /* #9ca3af */ !important;
+}
+
 .text-orange-500 {
   --tw-text-opacity: 1 !important;
   color: rgb(249 115 22 / var(--tw-text-opacity)) /* #f97316 */ !important;
+}
+
+.text-red-600 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(220 38 38 / var(--tw-text-opacity)) /* #dc2626 */ !important;
 }
 
 .cursor-pointer {
