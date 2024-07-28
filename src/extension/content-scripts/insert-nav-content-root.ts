@@ -5,11 +5,11 @@ const turboFrame = document.querySelector("turbo-frame#repo-content-turbo-frame"
 if (turboFrame === null) throw new Error("turbo-frame not found");
 
 // get the content container
-const contentContainer = turboFrame.querySelector("div");
-if (contentContainer === null) throw new Error("content container not found");
-
-// add the classes to the content container
-contentContainer.classList.remove("container-xl");
+const contentContainer = turboFrame.querySelector("div.clearfix");
+if (contentContainer) {
+  // make the container the right size
+  contentContainer.className = "clearfix mt-4 px-3 px-md-4 px-lg-5";
+}
 
 // get the nav element
 const nav = document.querySelector("[aria-label='Pull request tabs']");
