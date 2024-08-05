@@ -104,7 +104,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     <>
       {dependencies.length ? (
         <div id="dependency-container">
-          <h3 className="text-red-600">
+          <h3 className="tw-text-red-600">
             {dependencies.length} conflito{dependencies.length > 1 ? "s" : ""} identificado
             {dependencies.length > 1 ? "s" : ""}:
           </h3>
@@ -125,12 +125,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       ) : null}
 
       {diff ? (
-        <div id="diff-container" className="mb-3">
+        <div id="diff-container" className="tw-mb-3">
           <h1>Diff</h1>
           {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
         </div>
       ) : (
-        <div id="no-analysis" className="mb-3">
+        <div id="no-analysis" className="tw-mb-3">
           <p>Não foi encontrado nenhum registro de execução das análises...</p>
           <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
         </div>
