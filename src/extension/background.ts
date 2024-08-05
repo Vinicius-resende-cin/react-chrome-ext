@@ -45,14 +45,16 @@ function insertTabContent(tabId: number) {
  * Loads the CSS file.
  * @param tabId the id of the tab to load the CSS
  */
-function loadCSS(tabId: number) {
-  chrome.scripting.insertCSS(
-    {
-      target: { tabId: tabId },
-      files: ["./js/content.css"]
-    },
-    () => console.log("CSS loaded")
-  );
+function loadCSS(tabId: number, cssFiles: string[]) {
+  cssFiles.forEach((file) => {
+    chrome.scripting.insertCSS(
+      {
+        target: { tabId: tabId },
+        files: [`./js/${file}.css`]
+      },
+      () => console.log("CSS loaded")
+    );
+  });
 }
 
 /**
@@ -70,7 +72,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
   // Check if the url is a github pull request
   if (!isUrlGithubPullRequest(details.url)) return;
 
-  loadCSS(details.tabId);
+  loadCSS(details.tabId, ["diff2html", "tailwind"]);
   insertNavTab(details.tabId);
 });
 
