@@ -38,7 +38,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: "manifest.json", to: "../manifest.json" },
-        { from: "src/extension/content-scripts/*.css", to: "../js/[name].css" }
+        { from: "src/extension/styles/*.css", to: "../js/[name].css" }
       ]
     }),
     ...getHtmlPlugins(["index"])

@@ -1,0 +1,37 @@
+/* tailwind classes */
+.tw-mb-3 {
+  margin-bottom: 0.75rem /* 12px */ !important;
+}
+
+.tw-text-gray-200 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(229 231 235 / var(--tw-text-opacity)) /* #e5e7eb */ !important;
+}
+
+.tw-text-gray-400 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(156 163 175 / var(--tw-text-opacity)) /* #9ca3af */ !important;
+}
+
+.tw-text-orange-500 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(249 115 22 / var(--tw-text-opacity)) /* #f97316 */ !important;
+}
+
+.tw-text-red-600 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(220 38 38 / var(--tw-text-opacity)) /* #dc2626 */ !important;
+}
+
+.tw-cursor-pointer {
+  cursor: pointer !important;
+}
+
+.tw-border {
+  border: 1px solid !important;
+}
+
+.tw-border-yellow-400 {
+  --tw-border-opacity: 1 !important;
+  border-color: rgb(250 204 21 / var(--tw-border-opacity)) /* #facc15 */ !important;
+}
