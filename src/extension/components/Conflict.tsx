@@ -51,7 +51,7 @@ export default function Conflict({ dependency }: ConflictProps) {
 
   return (
     <div
-      className="tw-mb-3 tw-cursor-pointer"
+      className="tw-mb-3 tw-cursor-pointer tw-w-fit"
       onClick={() =>
         gotoDiff(
           dependency.body.interference[0].location.file.replaceAll("\\", "/"),

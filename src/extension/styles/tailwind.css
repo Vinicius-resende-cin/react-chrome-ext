@@ -3,6 +3,10 @@
   margin-bottom: 0.75rem /* 12px */ !important;
 }
 
+.tw-w-fit {
+  width: fit-content !important;
+}
+
 .tw-text-gray-200 {
   --tw-text-opacity: 1 !important;
   color: rgb(229 231 235 / var(--tw-text-opacity)) /* #e5e7eb */ !important;
