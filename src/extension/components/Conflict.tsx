@@ -45,19 +45,26 @@ export default function Conflict({ dependency }: ConflictProps) {
     return lineElement;
   };
 
-  const gotoDiff = (file: string, line: number) => {
-    // get the line element and scroll to it
-    const lineElement = getDiffLine(file, line);
-    scrollAndHighlight(lineElement);
+  const gotoDiffConflict = (file: string, l1: number, l2: number) => {
+    // get the first and last lines of the conflict
+    const lineFrom = getDiffLine(file, l1);
+    const lineTo = getDiffLine(file, l2);
+
+    // set navigation between both lines
+    lineFrom.onclick = () => scrollAndHighlight(lineTo);
+    lineTo.onclick = () => scrollAndHighlight(lineFrom);
+
+    scrollAndHighlight(lineFrom);
   };
 
   return (
     <div
       className="tw-mb-3 tw-cursor-pointer tw-w-fit"
       onClick={() =>
-        gotoDiff(
-          dependency.body.interference[0].location.file.replaceAll("\\", "/"),
-          dependency.body.interference[0].location.line
+        gotoDiffConflict(
+          dependency.body.interference[0].location.file.replaceAll("\\", "/"), // filename
+          dependency.body.interference[0].location.line, // first line
+          dependency.body.interference[dependency.body.interference.length - 1].location.line // last line
         )
       }>
       <span>
