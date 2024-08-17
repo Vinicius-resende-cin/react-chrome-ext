@@ -72,7 +72,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
   // Check if the url is a github pull request
   if (!isUrlGithubPullRequest(details.url)) return;
 
-  loadCSS(details.tabId, ["diff2html", "tailwind"]);
+  loadCSS(details.tabId, ["diff2html", "tailwind", "dependency-plugin"]);
   insertNavTab(details.tabId);
 });
 

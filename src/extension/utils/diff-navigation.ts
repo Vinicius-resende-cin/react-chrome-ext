@@ -1,6 +1,9 @@
 const highlight = (diffLine: HTMLElement) => {
-  diffLine.classList.add("tw-border");
-  diffLine.classList.add("tw-border-yellow-400");
+  diffLine.classList.add("pl-line-highlight");
+};
+
+const removeHighlight = (diffLine: HTMLElement) => {
+  diffLine.classList.remove("pl-line-highlight");
 };
 
 const scrollAndHighlight = (diffLine: HTMLElement) => {
@@ -56,4 +59,4 @@ const gotoDiffConflict = (file: string, l1: number, l2: number) => {
   return [lineFrom, lineTo];
 };
 
-export { gotoDiffConflict };
+export { gotoDiffConflict, highlight, removeHighlight, scrollAndHighlight, getDiffLine };
