@@ -3,6 +3,7 @@ import AnalysisService from "../../services/AnalysisService";
 import { dependency } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
+import { gotoDiffConflict } from "../utils/diff-navigation";
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
@@ -38,6 +39,21 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [dependencies, setDependencies] = useState<dependency[]>([]);
   const [diff, setDiff] = useState<string>("");
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
+  const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
+
+  const changeActiveConflict = (file: string, lineFrom: number, lineTo: number) => {
+    // remove the highlights from the previous conflict
+    if (activeConflict.length) {
+      activeConflict.forEach((line) => {
+        line.classList.remove("tw-border");
+        line.classList.remove("tw-border-yellow-400");
+      });
+    }
+
+    // set the new conflict as active
+    const newConflict = gotoDiffConflict(file, lineFrom, lineTo);
+    setActiveConflict(newConflict);
+  };
 
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
@@ -112,7 +128,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             {dependencies.map((d, i) => {
               return (
                 <li>
-                  <Conflict key={i} dependency={d} />
+                  <Conflict key={i} dependency={d} setConflict={changeActiveConflict} />
                 </li>
               );
             })}
