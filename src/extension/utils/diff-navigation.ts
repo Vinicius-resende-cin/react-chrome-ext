@@ -1,8 +1,33 @@
 import { interferenceNode, modLine } from "../../models/AnalysisOutput";
 
+const fadeOutBorder = (diffLine: HTMLElement) => {
+  diffLine.classList.add("pl-fadeout-border");
+};
+
 const highlight = (diffLine: HTMLElement) => {
+  // remove previous highlight if exists
+  diffLine.classList.remove("pl-line-highlight");
+  diffLine.classList.remove("pl-fadeout-border");
+
+  // add the highlight class
   diffLine.classList.add("pl-line-highlight");
-  setTimeout(() => diffLine.classList.remove("pl-line-highlight"), 5000);
+
+  // add the fade out effect
+  diffLine.addEventListener(
+    "mouseover",
+    () => {
+      fadeOutBorder(diffLine);
+    },
+    { once: true }
+  );
+
+  // remove the highlight class after the fade out effect
+  diffLine.addEventListener("animationend", (event) => {
+    if (event.animationName === "fadeOutBorder") {
+      diffLine.classList.remove("pl-line-highlight");
+      diffLine.classList.remove("pl-fadeout-border");
+    }
+  });
 };
 
 const removeHighlight = (diffLine: HTMLElement) => {
