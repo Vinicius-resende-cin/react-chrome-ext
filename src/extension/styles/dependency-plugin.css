@@ -1,0 +1,23 @@
+.pl-line-highlight {
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  animation: fadeInBorder 0.3s forwards 0.1s;
+}
+
+.pl-line-highlight.pl-fadeout-border {
+  border-color: rgb(250 204 21) /* #facc15 */;
+  animation: fadeOutBorder 3s forwards 0.1s;
+}
+
+@keyframes fadeInBorder {
+  to {
+    border-color: rgb(250 204 21) /* #facc15 */;
+  }
+}
+
+@keyframes fadeOutBorder {
+  to {
+    border-color: transparent;
+  }
+}
