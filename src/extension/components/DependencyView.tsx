@@ -1,6 +1,6 @@
 import { createElement, useEffect, useState } from "react";
 import AnalysisService from "../../services/AnalysisService";
-import { dependency } from "../../models/AnalysisOutput";
+import { dependency, modLine } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
 import { gotoDiffConflict, removeHighlight } from "../utils/diff-navigation";
@@ -27,14 +27,6 @@ interface DependencyViewProps {
   pull_number: number;
 }
 
-type modLine = {
-  file: string;
-  leftAdded: number[];
-  leftRemoved: number[];
-  rightAdded: number[];
-  rightRemoved: number[];
-};
-
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
   const [dependencies, setDependencies] = useState<dependency[]>([]);
   const [diff, setDiff] = useState<string>("");
@@ -45,6 +37,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // remove the styles from the previous conflict
     if (activeConflict.length) {
       activeConflict.forEach((line) => {
+        line.querySelectorAll("td").forEach((td) => {
+          td.classList.remove("d2h-ins-left");
+          td.classList.remove("d2h-ins");
+          td.classList.remove("d2h-del-left");
+          td.classList.remove("d2h-del");
+        });
         removeHighlight(line);
       });
     }
@@ -55,7 +53,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     const lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
     // set the new conflict as active
-    const newConflict = gotoDiffConflict(file, lineFrom, lineTo);
+    const newConflict = gotoDiffConflict(file, lineFrom, lineTo, modifiedLines);
     setActiveConflict(newConflict);
   };
 
@@ -91,11 +89,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           // update the colors of the insertions
           for (let line of insertions) {
             const lineNumber = line.querySelector(".line-num2")?.textContent;
-            console.log("lineNumber", lineNumber);
-            console.log("modLine.leftAdded", modLine.leftAdded);
             if (lineNumber && modLine.leftAdded.includes(Number.parseInt(lineNumber))) {
               // Line was added by left
-              console.log("Line was added by left");
               line.firstElementChild?.classList.remove("d2h-ins");
               line.firstElementChild?.classList.add("d2h-ins-left");
               line.lastElementChild?.classList.remove("d2h-ins");

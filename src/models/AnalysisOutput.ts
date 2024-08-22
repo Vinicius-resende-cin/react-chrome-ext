@@ -60,12 +60,18 @@ type lineLocation = {
   line: number;
 };
 
+type tracedNode = {
+  class: string;
+  method: string;
+  line: number;
+};
+
 export type interferenceNode = {
   type: interferenceType;
   branch: "L" | "R";
   text: string;
   location: lineLocation;
-  stackTrace?: Array<string>;
+  stackTrace?: Array<tracedNode>;
 };
 
 export type dependency = {
@@ -75,6 +81,14 @@ export type dependency = {
     description: string;
     interference: Array<interferenceNode>;
   };
+};
+
+export type modLine = {
+  file: string;
+  leftAdded: number[];
+  leftRemoved: number[];
+  rightAdded: number[];
+  rightRemoved: number[];
 };
 
 interface IAnalysisOutput {
