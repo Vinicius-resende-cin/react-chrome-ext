@@ -2,20 +2,12 @@ import { dependency } from "../../models/AnalysisOutput";
 
 interface ConflictProps {
   dependency: dependency;
-  setConflict: Function;
+  setConflict: (dep: dependency) => void;
 }
 
 export default function Conflict({ dependency, setConflict }: ConflictProps) {
   return (
-    <div
-      className="tw-mb-3 tw-cursor-pointer tw-w-fit"
-      onClick={() =>
-        setConflict(
-          dependency.body.interference[0].location.file.replaceAll("\\", "/"), // filename
-          dependency.body.interference[0].location.line, // first line
-          dependency.body.interference[dependency.body.interference.length - 1].location.line // last line
-        )
-      }>
+    <div className="tw-mb-3 tw-cursor-pointer tw-w-fit" onClick={() => setConflict(dependency)}>
       <span>
         {dependency.label} ({dependency.type})&nbsp;
       </span>

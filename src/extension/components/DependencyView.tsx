@@ -41,13 +41,18 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
 
-  const changeActiveConflict = (file: string, lineFrom: number, lineTo: number) => {
-    // remove the highlights from the previous conflict
+  const changeActiveConflict = (dep: dependency) => {
+    // remove the styles from the previous conflict
     if (activeConflict.length) {
       activeConflict.forEach((line) => {
         removeHighlight(line);
       });
     }
+
+    // get the filename and line numbers of the conflict
+    const file = dep.body.interference[0].location.file.replaceAll("\\", "/"); // filename
+    const lineFrom = dep.body.interference[0]; // first line
+    const lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
     // set the new conflict as active
     const newConflict = gotoDiffConflict(file, lineFrom, lineTo);
