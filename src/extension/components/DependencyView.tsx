@@ -120,7 +120,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       {dependencies.length ? (
         <div id="dependency-container">
           <h3 className="tw-text-red-600">
-            {dependencies.length} conflito{dependencies.length > 1 ? "s" : ""} identificado
+            {dependencies.length} possíveis conflito{dependencies.length > 1 ? "s" : ""} identificado
             {dependencies.length > 1 ? "s" : ""}:
           </h3>
           <ul>
