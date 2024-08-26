@@ -59,7 +59,20 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
-      setDependencies(response.getDependencies());
+      setDependencies(
+        response.getDependencies().sort((a, b) => {
+          const aStartLine = a.body.interference[0].location.line;
+          const bStartLine = b.body.interference[0].location.line;
+          const aEndLine = a.body.interference[a.body.interference.length - 1].location.line;
+          const bEndLine = b.body.interference[b.body.interference.length - 1].location.line;
+
+          if (aStartLine < bStartLine) return -1;
+          if (aStartLine > bStartLine) return 1;
+          if (aEndLine < bEndLine) return -1;
+          if (aEndLine > bEndLine) return 1;
+          return 0;
+        })
+      );
       setDiff(response.getDiff());
       setModifiedLines(response.data.modifiedLines ?? []);
     });
