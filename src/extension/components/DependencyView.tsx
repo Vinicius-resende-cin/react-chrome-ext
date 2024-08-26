@@ -129,14 +129,16 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   }, [modifiedLines]);
 
   return (
-    <>
+    <div id="dependency-plugin" className="tw-flex tw-flex-row tw-justify-between">
       {dependencies.length ? (
-        <div id="dependency-container">
-          <h3 className="tw-text-red-600">
+        <div
+          id="dependency-container"
+          className="tw-min-w-fit tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
+          <h3 className="tw-mb-5 tw-text-red-600">
             {dependencies.length} possíveis conflito{dependencies.length > 1 ? "s" : ""} identificado
             {dependencies.length > 1 ? "s" : ""}:
           </h3>
-          <ul>
+          <ul className="tw-list-none">
             {dependencies.map((d, i) => {
               return (
                 <li>
@@ -153,7 +155,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       ) : null}
 
       {diff ? (
-        <div id="diff-container" className="tw-mb-3">
+        <div id="diff-container" className="tw-mb-3 tw-w-full">
           <h1>Diff</h1>
           {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
         </div>
@@ -163,6 +165,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
         </div>
       )}
-    </>
+    </div>
   );
 }
