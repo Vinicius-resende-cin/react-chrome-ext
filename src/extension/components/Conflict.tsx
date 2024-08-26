@@ -13,7 +13,10 @@ export default function Conflict({ dependency, setConflict }: ConflictProps) {
       </span>
       {dependency.body.interference[0].location.file !== "UNKNOWN" ? (
         <p className="tw-text-gray-400">
-          in {dependency.body.interference[0].location.file}:{dependency.body.interference[0].location.line}
+          in {dependency.body.interference[0].location.class}:{dependency.body.interference[0].location.line}
+          &nbsp;&rarr;&nbsp;
+          {dependency.body.interference[dependency.body.interference.length - 1].location.class}:
+          {dependency.body.interference[dependency.body.interference.length - 1].location.line}
         </p>
       ) : null}
     </div>
