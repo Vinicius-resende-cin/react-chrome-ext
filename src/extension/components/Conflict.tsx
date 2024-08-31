@@ -18,6 +18,18 @@ export default function Conflict({ dependency, setConflict }: ConflictProps) {
           {dependency.body.interference[dependency.body.interference.length - 1].location.class}:
           {dependency.body.interference[dependency.body.interference.length - 1].location.line}
         </p>
+      ) : dependency.body.interference[0].stackTrace &&
+        dependency.body.interference[dependency.body.interference.length - 1].stackTrace ? (
+        <p className="tw-text-gray-400">
+          in {dependency.body.interference[0].stackTrace[0].class.replaceAll(".", "/")}.java:
+          {dependency.body.interference[0].stackTrace[0].line}
+          &nbsp;&rarr;&nbsp;
+          {dependency.body.interference[
+            dependency.body.interference.length - 1
+          ].stackTrace![0].class.replaceAll(".", "/")}
+          .java:
+          {dependency.body.interference[dependency.body.interference.length - 1].stackTrace![0].line}
+        </p>
       ) : null}
     </div>
   );
