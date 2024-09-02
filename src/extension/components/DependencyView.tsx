@@ -29,6 +29,7 @@ interface DependencyViewProps {
 
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
   const [dependencies, setDependencies] = useState<dependency[]>([]);
+  const [isCollapsed, setIsCollapsed] = useState(false); // State to control if the code is collapsed or not
   const [diff, setDiff] = useState<string>("");
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
@@ -114,6 +115,49 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     };
     updateDiffColors();
   }, [modifiedLines]);
+
+  // adding the listingEventChange on input viewed
+  useEffect(() => {
+    const checkboxInputs = document.querySelectorAll<HTMLElement>(".d2h-file-collapse-input");
+
+    const handleChange = (event: Event) => {
+      const target = event.target as HTMLInputElement; 
+      setIsCollapsed(target.checked);
+    };
+    
+    checkboxInputs.forEach((checkboxInput) =>{
+      if (checkboxInput) {
+        checkboxInput.addEventListener("change", handleChange);
+      }
+    })
+
+    // cleaning the event
+    return () => {
+
+      checkboxInputs.forEach((checkboxInput) =>{
+        if (checkboxInput) {
+          checkboxInput.removeEventListener("change", handleChange);
+        }
+      })
+    };
+  }, [diff]);
+
+  //Collapsing the diff file checked as viewed
+  useEffect(() => {
+    
+    const diffContainers = document.querySelectorAll<HTMLElement>(".d2h-file-diff");
+  
+    // Add or remove the class `hidden` based on state `isCollapsed`
+    diffContainers.forEach((diffContainer) => {
+      if (isCollapsed) {
+        diffContainer.classList.add("d2h-d-none");
+      } else {
+        diffContainer.classList.remove("d2h-d-none");
+      }
+    });
+  
+    
+  }, [isCollapsed]);
 
   return (
     <>
