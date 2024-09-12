@@ -97,22 +97,29 @@ const findSourceBranch = (node: interferenceNode, modifiedLines: modLine[]) => {
   const firstNodeFromLine = node.stackTrace?.[0].line;
   if (!firstNodeFromLine) return null;
 
-  // check if the line is in the modified lines
-  const fileModifiedLines = modifiedLines.find((ml) => ml.file.endsWith(firstNodeFromFile));
-  if (!fileModifiedLines) return null;
-
+  // check if the node has already a set branch
   let branch: "L" | "R" | null = null;
-  if (
-    fileModifiedLines.leftAdded.includes(firstNodeFromLine) ||
-    fileModifiedLines.leftRemoved.includes(firstNodeFromLine)
-  )
-    branch = "L";
-  else if (
-    fileModifiedLines.rightAdded.includes(firstNodeFromLine) ||
-    fileModifiedLines.rightRemoved.includes(firstNodeFromLine)
-  )
-    branch = "R";
-  else return null;
+  if (node.branch) {
+    branch = node.branch;
+  } else {
+    // check if the line is in the modified lines
+    const fileModifiedLines = modifiedLines.find(
+      (ml) => ml.file.endsWith(firstNodeFromFile) || firstNodeFromFile.endsWith(ml.file)
+    );
+    if (!fileModifiedLines) return null;
+
+    if (
+      fileModifiedLines.leftAdded.includes(firstNodeFromLine) ||
+      fileModifiedLines.leftRemoved.includes(firstNodeFromLine)
+    )
+      branch = "L";
+    else if (
+      fileModifiedLines.rightAdded.includes(firstNodeFromLine) ||
+      fileModifiedLines.rightRemoved.includes(firstNodeFromLine)
+    )
+      branch = "R";
+    else return null;
+  }
 
   // check if the line was added or removed
   const lineType: "ins" | "del" | "change" | null = checkLineModificationType(
@@ -190,4 +197,4 @@ const gotoDiffConflict = (
   return [lineFrom, lineTo];
 };
 
-export { gotoDiffConflict, highlight, removeHighlight, scrollAndHighlight, getDiffLine };
+export { gotoDiffConflict, highlight, removeHighlight, removeLineColor, scrollAndHighlight, getDiffLine };
