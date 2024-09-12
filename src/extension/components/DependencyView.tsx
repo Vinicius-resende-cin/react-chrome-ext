@@ -3,7 +3,7 @@ import AnalysisService from "../../services/AnalysisService";
 import { dependency, modLine } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
-import { gotoDiffConflict, removeHighlight } from "../utils/diff-navigation";
+import { gotoDiffConflict, removeHighlight, removeLineColor } from "../utils/diff-navigation";
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
@@ -37,12 +37,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // remove the styles from the previous conflict
     if (activeConflict.length) {
       activeConflict.forEach((line) => {
-        line.querySelectorAll("td").forEach((td) => {
-          td.classList.remove("d2h-ins-left");
-          td.classList.remove("d2h-ins");
-          td.classList.remove("d2h-del-left");
-          td.classList.remove("d2h-del");
-        });
+        removeLineColor(line, modifiedLines);
         removeHighlight(line);
       });
     }

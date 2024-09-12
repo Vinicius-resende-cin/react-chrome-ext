@@ -46,6 +46,33 @@ const setColorFromBranch = (diffLine: HTMLElement, branch: "L" | "R", colorType:
   });
 };
 
+const removeLineColor = (diffLine: HTMLElement, modifiedLines?: modLine[]) => {
+  if (modifiedLines) {
+    const file = diffLine.id.split(":")[0];
+    const line = parseInt(diffLine.id.split(":")[1]);
+
+    const fileModifiedLines = modifiedLines.find((ml) => ml.file.endsWith(file) || file.endsWith(ml.file));
+    if (!fileModifiedLines) return;
+
+    if (
+      fileModifiedLines.leftAdded.includes(line) ||
+      fileModifiedLines.rightAdded.includes(line) ||
+      fileModifiedLines.leftRemoved.includes(line) ||
+      fileModifiedLines.rightRemoved.includes(line)
+    ) {
+      console.info(`Line ${line} of file ${file} was modified, not removing color`);
+      return;
+    }
+  }
+
+  diffLine.querySelectorAll("td").forEach((td) => {
+    td.classList.remove("d2h-ins-left");
+    td.classList.remove("d2h-ins");
+    td.classList.remove("d2h-del-left");
+    td.classList.remove("d2h-del");
+  });
+};
+
 const checkLineModificationType = (file: string, line: number) => {
   // get the diffLine element
   let diffLine = getDiffLine(file, line);
