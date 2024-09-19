@@ -11,7 +11,10 @@ type locationStrings = {
 };
 
 export default function Conflict({ dependency, setConflict }: ConflictProps) {
-  const getLocationFromStackTrace: (dep: dependency) => locationStrings = (dep: dependency) => {
+  const getLocationFromStackTrace: (dep: dependency, updateDependency: boolean) => locationStrings = (
+    dep: dependency,
+    updateDependency: boolean
+  ) => {
     if (
       !dep.body.interference[0].stackTrace ||
       !dep.body.interference[dep.body.interference.length - 1].stackTrace
@@ -19,14 +22,21 @@ export default function Conflict({ dependency, setConflict }: ConflictProps) {
       throw new Error("File not found: Invalid stack trace");
 
     const stackTrace0 = dep.body.interference[0].stackTrace[0];
-    const location0 = stackTrace0.class.replaceAll(".", "/") + ".java";
+    const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
 
     const stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
-    const locationN = stackTraceN.class.replaceAll(".", "/") + ".java";
+    const fileN = stackTraceN.class.replaceAll(".", "/") + ".java";
+
+    if (updateDependency) {
+      dep.body.interference[0].location.file = file0;
+      dep.body.interference[0].location.line = stackTrace0.line;
+      dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
+      dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
+    }
 
     return {
-      from: `${location0}:${stackTrace0.line}`,
-      to: `${locationN}:${stackTraceN.line}`
+      from: `${file0}:${stackTrace0.line}`,
+      to: `${fileN}:${stackTraceN.line}`
     };
   };
 
@@ -35,7 +45,7 @@ export default function Conflict({ dependency, setConflict }: ConflictProps) {
     const locationN = dep.body.interference[dep.body.interference.length - 1].location;
 
     if (location0.file === "UNKNOWN" || locationN.file === "UNKNOWN") {
-      return getLocationFromStackTrace(dep);
+      return getLocationFromStackTrace(dep, true);
     } else {
       return {
         from: `${location0.class}:${location0.line}`,
