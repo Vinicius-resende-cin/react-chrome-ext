@@ -153,30 +153,28 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       const fileName = fileNameSpan?.textContent || "";
       setIsCollapsed((prevState) => ({
         ...prevState,
-        [fileName]: target.checked,
+        [fileName]: target.checked
       }));
     };
     
-    checkboxInputs.forEach((checkboxInput) =>{
+    checkboxInputs.forEach((checkboxInput) => {
       if (checkboxInput) {
         checkboxInput.addEventListener("change", handleChange);
       }
-    })
+    });
 
     // cleaning the event
     return () => {
-
-      checkboxInputs.forEach((checkboxInput) =>{
+      checkboxInputs.forEach((checkboxInput) => {
         if (checkboxInput) {
           checkboxInput.removeEventListener("change", handleChange);
         }
-      })
+      });
     };
   }, [diff]);
 
   //Collapsing the diff file checked as viewed
   useEffect(() => {
-    
     const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
   
     // Add or remove the class `d2h-d-none` based on state `isCollapsed`
@@ -185,14 +183,11 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       const diffContainer = diffFile.querySelector(".d2h-file-diff");
       
       if (isCollapsed[fileName]) {
-        
         diffContainer?.classList.add("d2h-d-none");
       } else {
         diffContainer?.classList.remove("d2h-d-none");
       }
     });
-  
-    
   }, [isCollapsed]);
 
   return (
