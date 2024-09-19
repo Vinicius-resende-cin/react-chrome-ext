@@ -29,10 +29,50 @@ interface DependencyViewProps {
 
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
   const [dependencies, setDependencies] = useState<dependency[]>([]);
-  const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean}>({}); // State to control if the code is collapsed or not
+  const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
   const [diff, setDiff] = useState<string>("");
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
+
+  const updateLocationFromStackTrace = (dep: dependency) => {
+    if (
+      !dep.body.interference[0].stackTrace ||
+      !dep.body.interference[dep.body.interference.length - 1].stackTrace
+    )
+      throw new Error("File not found: Invalid stack trace");
+
+    const stackTrace0 = dep.body.interference[0].stackTrace[0];
+    const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
+
+    const stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
+    const fileN = stackTraceN.class.replaceAll(".", "/") + ".java";
+
+    dep.body.interference[0].location.file = file0;
+    dep.body.interference[0].location.line = stackTrace0.line;
+    dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
+    dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
+  };
+
+  const filterDuplicatedDependencies = (dependencies: dependency[]) => {
+    const uniqueDependencies: dependency[] = [];
+    dependencies.forEach((dep) => {
+      if (
+        !uniqueDependencies.some(
+          (d) =>
+            d.body.interference[0].location.file === dep.body.interference[0].location.file &&
+            d.body.interference[0].location.line === dep.body.interference[0].location.line &&
+            d.body.interference[d.body.interference.length - 1].location.file ===
+              dep.body.interference[dep.body.interference.length - 1].location.file &&
+            d.body.interference[d.body.interference.length - 1].location.line ===
+              dep.body.interference[dep.body.interference.length - 1].location.line
+        )
+      ) {
+        uniqueDependencies.push(dep);
+      }
+    });
+
+    return uniqueDependencies;
+  };
 
   const changeActiveConflict = (dep: dependency) => {
     // remove the styles from the previous conflict
@@ -73,8 +113,18 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
+      let dependencies = response.getDependencies();
+      dependencies.forEach((dep) => {
+        if (
+          dep.body.interference[0].location.file === "UNKNOWN" ||
+          dep.body.interference[dep.body.interference.length - 1].location.file === "UNKNOWN"
+        )
+          updateLocationFromStackTrace(dep);
+      });
+      dependencies = filterDuplicatedDependencies(dependencies);
+
       setDependencies(
-        response.getDependencies().sort((a, b) => {
+        dependencies.sort((a, b) => {
           const aStartLine = a.body.interference[0].location.line;
           const bStartLine = b.body.interference[0].location.line;
           const aEndLine = a.body.interference[a.body.interference.length - 1].location.line;
@@ -147,7 +197,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     const checkboxInputs = document.querySelectorAll<HTMLElement>(".d2h-file-collapse-input");
 
     const handleChange = (event: Event) => {
-      const target = event.target as HTMLInputElement; 
+      const target = event.target as HTMLInputElement;
       const fileHeaderDiv = target.closest(".d2h-file-header");
       const fileNameSpan = fileHeaderDiv?.querySelector(".d2h-file-name");
       const fileName = fileNameSpan?.textContent || "";
@@ -156,7 +206,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         [fileName]: target.checked
       }));
     };
-    
+
     checkboxInputs.forEach((checkboxInput) => {
       if (checkboxInput) {
         checkboxInput.addEventListener("change", handleChange);
@@ -176,12 +226,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   //Collapsing the diff file checked as viewed
   useEffect(() => {
     const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
-  
+
     // Add or remove the class `d2h-d-none` based on state `isCollapsed`
     diffFiles.forEach((diffFile) => {
       const fileName = diffFile.querySelector(".d2h-file-name")?.textContent || "";
       const diffContainer = diffFile.querySelector(".d2h-file-diff");
-      
+
       if (isCollapsed[fileName]) {
         diffContainer?.classList.add("d2h-d-none");
       } else {
