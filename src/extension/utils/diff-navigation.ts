@@ -1,4 +1,4 @@
-import { interferenceNode, modLine } from "../../models/AnalysisOutput";
+import { interferenceNode, modLine, dependency } from "../../models/AnalysisOutput";
 
 const fadeOutBorder = (diffLine: HTMLElement) => {
   diffLine.classList.add("pl-fadeout-border");
@@ -164,6 +164,29 @@ const unsetAsConflictLine = (diffLine: HTMLElement) => {
   leftLineNumber.removeAttribute("prev-text");
 };
 
+const updateLocationFromStackTrace = (dep: dependency) => {
+  if (
+    !dep.body.interference[0].stackTrace ||
+    !dep.body.interference[dep.body.interference.length - 1].stackTrace
+  )
+    throw new Error("File not found: Invalid stack trace");
+
+  const stackTrace0 = dep.body.interference[0].stackTrace[0];
+  const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
+
+  const stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
+  const fileN = stackTraceN.class.replaceAll(".", "/") + ".java";
+
+  dep.body.interference[0].location.file = file0;
+  dep.body.interference[0].location.line = stackTrace0.line;
+  dep.body.interference[0].location.class = stackTrace0.class;
+  dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
+  dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
+  dep.body.interference[dep.body.interference.length - 1].location.class = stackTraceN.class;
+
+  return dep;
+};
+
 const getDiffLine = (file: string, line: number) => {
   // try to get the line element by id
   let lineElement = document.getElementById(`${file}:${line}`);
@@ -235,5 +258,6 @@ export {
   unsetAsConflictLine,
   removeLineColor,
   scrollAndHighlight,
-  getDiffLine
+  getDiffLine,
+  updateLocationFromStackTrace
 };

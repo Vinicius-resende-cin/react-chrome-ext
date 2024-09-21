@@ -3,7 +3,11 @@ import AnalysisService from "../../services/AnalysisService";
 import { dependency, modLine } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
-import { gotoDiffConflict, unsetAsConflictLine } from "../utils/diff-navigation";
+import {
+  gotoDiffConflict,
+  unsetAsConflictLine,
+  updateLocationFromStackTrace
+} from "../utils/diff-navigation";
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
@@ -33,25 +37,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [diff, setDiff] = useState<string>("");
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
-
-  const updateLocationFromStackTrace = (dep: dependency) => {
-    if (
-      !dep.body.interference[0].stackTrace ||
-      !dep.body.interference[dep.body.interference.length - 1].stackTrace
-    )
-      throw new Error("File not found: Invalid stack trace");
-
-    const stackTrace0 = dep.body.interference[0].stackTrace[0];
-    const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
-
-    const stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
-    const fileN = stackTraceN.class.replaceAll(".", "/") + ".java";
-
-    dep.body.interference[0].location.file = file0;
-    dep.body.interference[0].location.line = stackTrace0.line;
-    dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
-    dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
-  };
 
   const filterDuplicatedDependencies = (dependencies: dependency[]) => {
     const uniqueDependencies: dependency[] = [];

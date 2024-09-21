@@ -1,4 +1,5 @@
 import { dependency } from "../../models/AnalysisOutput";
+import { updateLocationFromStackTrace } from "../utils/diff-navigation";
 
 interface ConflictProps {
   dependency: dependency;
@@ -11,32 +12,17 @@ type locationStrings = {
 };
 
 export default function Conflict({ dependency, setConflict }: ConflictProps) {
-  const getLocationFromStackTrace: (dep: dependency, updateDependency: boolean) => locationStrings = (
-    dep: dependency,
-    updateDependency: boolean
-  ) => {
-    if (
-      !dep.body.interference[0].stackTrace ||
-      !dep.body.interference[dep.body.interference.length - 1].stackTrace
-    )
-      throw new Error("File not found: Invalid stack trace");
+  const getLocationFromStackTrace: (dep: dependency) => locationStrings = (dep: dependency) => {
+    const newDep = updateLocationFromStackTrace(dep);
 
-    const stackTrace0 = dep.body.interference[0].stackTrace[0];
-    const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
-
-    const stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
-    const fileN = stackTraceN.class.replaceAll(".", "/") + ".java";
-
-    if (updateDependency) {
-      dep.body.interference[0].location.file = file0;
-      dep.body.interference[0].location.line = stackTrace0.line;
-      dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
-      dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
-    }
+    const class0 = newDep.body.interference[0].location.class;
+    const line0 = newDep.body.interference[0].location.line;
+    const classN = newDep.body.interference[newDep.body.interference.length - 1].location.class;
+    const lineN = newDep.body.interference[newDep.body.interference.length - 1].location.line;
 
     return {
-      from: `${file0}:${stackTrace0.line}`,
-      to: `${fileN}:${stackTraceN.line}`
+      from: `${class0}:${line0}`,
+      to: `${classN}:${lineN}`
     };
   };
 
@@ -45,7 +31,7 @@ export default function Conflict({ dependency, setConflict }: ConflictProps) {
     const locationN = dep.body.interference[dep.body.interference.length - 1].location;
 
     if (location0.file === "UNKNOWN" || locationN.file === "UNKNOWN") {
-      return getLocationFromStackTrace(dep, true);
+      return getLocationFromStackTrace(dep);
     } else {
       return {
         from: `${location0.class}:${location0.line}`,
