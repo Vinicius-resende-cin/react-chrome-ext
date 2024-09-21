@@ -33,6 +33,10 @@
   width: 100% !important;
 }
 
+.tw-max-w-\[20\%\] {
+  max-width: 20% !important;
+}
+
 .tw-h-fit {
   height: fit-content !important;
 }
