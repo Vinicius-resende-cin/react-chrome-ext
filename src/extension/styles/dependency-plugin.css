@@ -1,5 +1,16 @@
+.pl-conflict-line {
+  border-left-width: 2px;
+  border-left-style: solid;
+  border-left-color: rgb(250 204 21) /* #facc15 */;
+}
+
+.pl-conflict-line > :first-child > :first-child {
+  color: rgb(250 204 21) /* #facc15 */;
+}
+
 .pl-line-highlight {
   border-width: 1px;
+  border-left-width: 2px;
   border-style: solid;
   border-color: transparent;
   animation: fadeInBorder 0.3s forwards 0.1s;
@@ -7,7 +18,7 @@
 
 .pl-line-highlight.pl-fadeout-border {
   border-color: rgb(250 204 21) /* #facc15 */;
-  animation: fadeOutBorder 3s forwards 0.1s;
+  animation: fadeOutBorder 1s forwards 0.1s;
 }
 
 @keyframes fadeInBorder {
@@ -19,5 +30,6 @@
 @keyframes fadeOutBorder {
   to {
     border-color: transparent;
+    border-left-color: rgb(250 204 21) /* #facc15 */;
   }
 }

@@ -3,7 +3,7 @@ import AnalysisService from "../../services/AnalysisService";
 import { dependency, modLine } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
-import { gotoDiffConflict, removeHighlight, removeLineColor } from "../utils/diff-navigation";
+import { gotoDiffConflict, unsetAsConflictLine } from "../utils/diff-navigation";
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
@@ -78,8 +78,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // remove the styles from the previous conflict
     if (activeConflict.length) {
       activeConflict.forEach((line) => {
-        removeLineColor(line, modifiedLines);
-        removeHighlight(line);
+        unsetAsConflictLine(line);
       });
     }
 

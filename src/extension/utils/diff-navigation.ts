@@ -88,7 +88,15 @@ const checkLineModificationType = (file: string, line: number) => {
   else return null;
 };
 
-const findSourceBranch = (node: interferenceNode, modifiedLines: modLine[]) => {
+type sourceBranch = {
+  branch: "L" | "R";
+  lineType: "del" | "ins";
+};
+
+const findSourceBranch: (node: interferenceNode, modifiedLines: modLine[]) => sourceBranch | null = (
+  node: interferenceNode,
+  modifiedLines: modLine[]
+) => {
   // get the filename of the first node in the stack trace
   const firstNodeFromFile = node.stackTrace?.[0].class.split(".").pop() + ".java";
   if (!firstNodeFromFile) return null;
@@ -129,6 +137,31 @@ const findSourceBranch = (node: interferenceNode, modifiedLines: modLine[]) => {
   if (!lineType) return null;
 
   return { branch, lineType: lineType === "change" ? "ins" : lineType };
+};
+
+const setAsConflictLine = (diffLine: HTMLElement, srcBranch: sourceBranch | null) => {
+  // set the colors of the lines
+  if (srcBranch) setColorFromBranch(diffLine, srcBranch.branch, srcBranch.lineType);
+  else highlight(diffLine);
+
+  // set the conflict line class
+  diffLine.classList.add("pl-conflict-line");
+
+  // change the left line number
+  const leftLineNumber = diffLine.querySelector(".line-num1") as HTMLElement;
+  leftLineNumber.setAttribute("prev-text", leftLineNumber.textContent || "");
+  leftLineNumber.textContent = " →";
+};
+
+const unsetAsConflictLine = (diffLine: HTMLElement) => {
+  removeLineColor(diffLine);
+  removeHighlight(diffLine);
+  diffLine.classList.remove("pl-conflict-line");
+
+  // change back the left line number
+  const leftLineNumber = diffLine.querySelector(".line-num1") as HTMLElement;
+  leftLineNumber.textContent = leftLineNumber.getAttribute("prev-text") || "";
+  leftLineNumber.removeAttribute("prev-text");
 };
 
 const getDiffLine = (file: string, line: number) => {
@@ -175,12 +208,9 @@ const gotoDiffConflict = (
   const sourceBranchFrom = findSourceBranch(l1, modifiedLines);
   const sourceBranchTo = findSourceBranch(l2, modifiedLines);
 
-  // set the colors of the lines
-  if (sourceBranchFrom) setColorFromBranch(lineFrom, sourceBranchFrom.branch, sourceBranchFrom.lineType);
-  else highlight(lineFrom);
-
-  if (sourceBranchTo) setColorFromBranch(lineTo, sourceBranchTo.branch, sourceBranchTo.lineType);
-  else highlight(lineTo);
+  // set the conflict line style
+  setAsConflictLine(lineFrom, sourceBranchFrom);
+  setAsConflictLine(lineTo, sourceBranchTo);
 
   // set navigation between both lines
   lineFrom.onclick = () => {
@@ -197,4 +227,13 @@ const gotoDiffConflict = (
   return [lineFrom, lineTo];
 };
 
-export { gotoDiffConflict, highlight, removeHighlight, removeLineColor, scrollAndHighlight, getDiffLine };
+export {
+  gotoDiffConflict,
+  highlight,
+  removeHighlight,
+  setAsConflictLine,
+  unsetAsConflictLine,
+  removeLineColor,
+  scrollAndHighlight,
+  getDiffLine
+};
