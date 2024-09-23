@@ -63,7 +63,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     return uniqueDependencies;
   };
 
-  const changeActiveConflict = (dep: dependency, index: number) => {
+  const changeActiveConflict = (dep: dependency) => {
     // remove the styles from the previous conflict
     if (activeConflictLines.length) {
       activeConflictLines.forEach((line) => {
@@ -87,9 +87,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // set the new conflict as active
     const newConflict = gotoDiffConflict(fileFrom, fileTo, lineFrom, lineTo, modifiedLines);
     setActiveConflictLines(newConflict);
-    setActiveConflict(index);
   };
 
+  // get the analysis output
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
       let dependencies = response.getDependencies();
@@ -121,6 +121,15 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
   }, [owner, repository, pull_number]);
 
+  // update the active conflict
+  useEffect(() => {
+    if (activeConflict !== null) {
+      const conflict = dependencies[activeConflict];
+      changeActiveConflict(conflict);
+    }
+  }, [activeConflict]);
+
+  // update the colors of the diff
   useEffect(() => {
     const updateDiffColors = () => {
       const diffContainer = document.getElementById("diff-container");
@@ -233,7 +242,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             {dependencies.map((d, i) => {
               return (
                 <li>
-                  <Conflict key={i} index={i} dependency={d} setConflict={changeActiveConflict} />
+                    <Conflict key={i} index={i} dependency={d} setConflict={setActiveConflict} />
                 </li>
               );
             })}

@@ -4,7 +4,7 @@ import { updateLocationFromStackTrace } from "../utils/diff-navigation";
 interface ConflictProps {
   index: number;
   dependency: dependency;
-  setConflict: (dep: dependency, index: number) => void;
+  setConflict: (index: number) => void;
 }
 
 type locationStrings = {
@@ -44,7 +44,7 @@ export default function Conflict({ index, dependency, setConflict }: ConflictPro
   const locationStrings = getLocationStrings(dependency);
 
   return (
-    <div className="tw-mb-3 tw-cursor-pointer tw-w-fit" onClick={() => setConflict(dependency, index)}>
+    <div className="tw-mb-3 tw-cursor-pointer tw-w-fit" onClick={() => setConflict(index)}>
       <span>
         {dependency.label} ({dependency.type})&nbsp;
       </span>
