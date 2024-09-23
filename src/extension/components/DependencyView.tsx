@@ -41,6 +41,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [activeConflict, setActiveConflict] = useState<number | null>(null); // index of the active conflict on dependencies list
   const [activeConflictLines, setActiveConflictLines] = useState<HTMLElement[]>([]); // lines of the active conflict
   const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
+  /*
+   * conflictViewMode: This state is used to control the view mode of the conflicts.
+   * The default mode shows the conflicts with the first valid nodes from the analysis.
+   * The deep mode shows the last valid nodes in the stack trace of the conflicts.
+   */
+  const [conflictViewMode, setConflictViewMode] = useState<"default" | "deep">("default"); // conflict view mode
 
   const filterDuplicatedDependencies = (dependencies: dependency[]) => {
     const uniqueDependencies: dependency[] = [];
@@ -71,6 +77,11 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       });
     }
 
+    // update the location if the deep mode is active
+    if (conflictViewMode === "deep") {
+      dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
+    }
+
     // get the filename and line numbers of the conflict
     let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
     let lineFrom = dep.body.interference[0]; // first line
@@ -87,6 +98,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // set the new conflict as active
     const newConflict = gotoDiffConflict(fileFrom, fileTo, lineFrom, lineTo, modifiedLines);
     setActiveConflictLines(newConflict);
+  };
+
+  const handleChangeConflictViewMode = (toDeepMode: boolean) => {
+    setConflictViewMode(toDeepMode ? "deep" : "default");
   };
 
   // get the analysis output
@@ -127,7 +142,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       const conflict = dependencies[activeConflict];
       changeActiveConflict(conflict);
     }
-  }, [activeConflict]);
+  }, [activeConflict, conflictViewMode]);
 
   // update the colors of the diff
   useEffect(() => {
@@ -229,42 +244,55 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   }, [isCollapsed]);
 
   return (
-    <div id="dependency-plugin" className="tw-flex tw-flex-row tw-justify-between">
-      {dependencies.length ? (
-        <div
-          id="dependency-container"
-          className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
-          <h3 className="tw-mb-5 tw-text-red-600">
-            {dependencies.length} possíveis conflito{dependencies.length > 1 ? "s" : ""} identificado
-            {dependencies.length > 1 ? "s" : ""}:
-          </h3>
-          <ul className="tw-list-none">
-            {dependencies.map((d, i) => {
-              return (
-                <li>
+    <div id="dependency-plugin">
+      <div id="dependency-plugin-options" className="tw-mb-3 tw-flex tw-flex-row">
+        <input
+          type="checkbox"
+          name="conflict-view-mode-checkbox"
+          id="conflict-view-mode"
+          onChange={(e) => handleChangeConflictViewMode(e.target.checked)}
+        />
+        <label htmlFor="conflict-view-mode" className="tw-ml-3">
+          Deep mode
+        </label>
+      </div>
+      <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
+        {dependencies.length ? (
+          <div
+            id="dependency-container"
+            className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
+            <h3 className="tw-mb-5 tw-text-red-600">
+              {dependencies.length} possíveis conflito{dependencies.length > 1 ? "s" : ""} identificado
+              {dependencies.length > 1 ? "s" : ""}:
+            </h3>
+            <ul className="tw-list-none">
+              {dependencies.map((d, i) => {
+                return (
+                  <li>
                     <Conflict key={i} index={i} dependency={d} setConflict={setActiveConflict} />
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ) : diff ? (
-        <div id="no-dependencies">
-          <p>Não foram encontradas dependências durante as análises.</p>
-        </div>
-      ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : diff ? (
+          <div id="no-dependencies">
+            <p>Não foram encontradas dependências durante as análises.</p>
+          </div>
+        ) : null}
 
-      {diff ? (
-        <div id="diff-container" className="tw-mb-3 tw-w-full">
-          <h1>Diff</h1>
-          {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
-        </div>
-      ) : (
-        <div id="no-analysis" className="tw-mb-3">
-          <p>Não foi encontrado nenhum registro de execução das análises...</p>
-          <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
-        </div>
-      )}
+        {diff ? (
+          <div id="diff-container" className="tw-mb-3 tw-w-full">
+            <h1>Diff</h1>
+            {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
+          </div>
+        ) : (
+          <div id="no-analysis" className="tw-mb-3">
+            <p>Não foi encontrado nenhum registro de execução das análises...</p>
+            <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
