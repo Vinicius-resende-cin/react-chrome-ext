@@ -72,30 +72,19 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     // get the filename and line numbers of the conflict
-    let file = dep.body.interference[0].location.file.replaceAll("\\", "/"); // filename
+    let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
     let lineFrom = dep.body.interference[0]; // first line
+    let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
     let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
-    if (file === "UNKNOWN") {
-      // conflict in an unknown file
-      // check if stack trace has a valid file
-      if (
-        !dep.body.interference[0].stackTrace ||
-        !dep.body.interference[dep.body.interference.length - 1].stackTrace
-      )
-        throw new Error("File not found: Invalid stack trace");
-
-      // get the stack trace file path
-      let javaFilePath = dep.body.interference[0].stackTrace[0].class.replaceAll(".", "/");
-
-      // assign the data based on stack trace
-      file = `${javaFilePath}.java`;
-      lineFrom.location.line = dep.body.interference[0].stackTrace[0].line;
-      lineTo.location.line = dep.body.interference[dep.body.interference.length - 1].stackTrace![0].line;
+    if (fileFrom === "UNKNOWN" || fileTo === "UNKNOWN") {
+      updateLocationFromStackTrace(dep);
+      fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/");
+      fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/");
     }
 
     // set the new conflict as active
-    const newConflict = gotoDiffConflict(file, lineFrom, lineTo, modifiedLines);
+    const newConflict = gotoDiffConflict(fileFrom, fileTo, lineFrom, lineTo, modifiedLines);
     setActiveConflictLines(newConflict);
     setActiveConflict(index);
   };

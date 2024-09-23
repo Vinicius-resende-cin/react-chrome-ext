@@ -218,14 +218,15 @@ const getDiffLine = (file: string, line: number) => {
 };
 
 const gotoDiffConflict = (
-  file: string,
+  file1: string,
+  file2: string,
   l1: interferenceNode,
   l2: interferenceNode,
   modifiedLines: modLine[]
 ) => {
   // get the first and last lines of the conflict
-  const lineFrom = getDiffLine(file, l1.location.line);
-  const lineTo = getDiffLine(file, l2.location.line);
+  const lineFrom = getDiffLine(file1, l1.location.line);
+  const lineTo = getDiffLine(file2, l2.location.line);
 
   // get the source branch for each line
   const sourceBranchFrom = findSourceBranch(l1, modifiedLines);
