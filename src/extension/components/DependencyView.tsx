@@ -32,11 +32,14 @@ interface DependencyViewProps {
 }
 
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
+  // analysis properties
   const [dependencies, setDependencies] = useState<dependency[]>([]);
-  const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
-  const [diff, setDiff] = useState<string>("");
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
+  const [diff, setDiff] = useState<string>("");
+
+  // page properties
   const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
+  const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
 
   const filterDuplicatedDependencies = (dependencies: dependency[]) => {
     const uniqueDependencies: dependency[] = [];
