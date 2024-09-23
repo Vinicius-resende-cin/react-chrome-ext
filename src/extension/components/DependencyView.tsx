@@ -67,7 +67,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // remove the styles from the previous conflict
     if (activeConflictLines.length) {
       activeConflictLines.forEach((line) => {
-        unsetAsConflictLine(line);
+        unsetAsConflictLine(line, modifiedLines);
       });
     }
 

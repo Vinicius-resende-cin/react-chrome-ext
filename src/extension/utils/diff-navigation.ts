@@ -153,8 +153,9 @@ const setAsConflictLine = (diffLine: HTMLElement, srcBranch: sourceBranch | null
   leftLineNumber.textContent = " →";
 };
 
-const unsetAsConflictLine = (diffLine: HTMLElement) => {
-  removeLineColor(diffLine);
+const unsetAsConflictLine = (diffLine: HTMLElement, modifiedLines: modLine[]) => {
+  // remove styles
+  removeLineColor(diffLine, modifiedLines);
   removeHighlight(diffLine);
   diffLine.classList.remove("pl-conflict-line");
 
