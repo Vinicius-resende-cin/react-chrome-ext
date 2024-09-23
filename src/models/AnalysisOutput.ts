@@ -60,7 +60,7 @@ type lineLocation = {
   line: number;
 };
 
-type tracedNode = {
+export type tracedNode = {
   class: string;
   method: string;
   line: number;
