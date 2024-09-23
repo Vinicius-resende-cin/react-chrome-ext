@@ -60,7 +60,7 @@ const removeLineColor = (diffLine: HTMLElement, modifiedLines?: modLine[]) => {
       fileModifiedLines.leftRemoved.includes(line) ||
       fileModifiedLines.rightRemoved.includes(line)
     ) {
-      console.info(`Line ${line} of file ${file} was modified, not removing color`);
+      console.info(`Line ${line} of file ${file} was modified, the color will be maintained`);
       return;
     }
   }
