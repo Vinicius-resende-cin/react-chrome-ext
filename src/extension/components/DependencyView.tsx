@@ -38,7 +38,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [diff, setDiff] = useState<string>("");
 
   // page properties
-  const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
+  const [activeConflictLines, setActiveConflictLines] = useState<HTMLElement[]>([]); // lines of the active conflict
   const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
 
   const filterDuplicatedDependencies = (dependencies: dependency[]) => {
@@ -64,8 +64,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   const changeActiveConflict = (dep: dependency) => {
     // remove the styles from the previous conflict
-    if (activeConflict.length) {
-      activeConflict.forEach((line) => {
+    if (activeConflictLines.length) {
+      activeConflictLines.forEach((line) => {
         unsetAsConflictLine(line);
       });
     }
@@ -95,7 +95,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
     // set the new conflict as active
     const newConflict = gotoDiffConflict(file, lineFrom, lineTo, modifiedLines);
-    setActiveConflict(newConflict);
+    setActiveConflictLines(newConflict);
   };
 
   useEffect(() => {
