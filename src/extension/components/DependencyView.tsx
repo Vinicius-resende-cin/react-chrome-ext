@@ -44,7 +44,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   /*
    * conflictViewMode: This state is used to control the view mode of the conflicts.
    * The default mode shows the conflicts with the first valid nodes from the analysis.
-   * The deep mode shows the last valid nodes in the stack trace of the conflicts.
+   * The deep mode ensures that the last valid nodes in the stack trace are shown.
    */
   const [conflictViewMode, setConflictViewMode] = useState<"default" | "deep">("default"); // conflict view mode
 
