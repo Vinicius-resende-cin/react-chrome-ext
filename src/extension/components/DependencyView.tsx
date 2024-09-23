@@ -38,6 +38,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [diff, setDiff] = useState<string>("");
 
   // page properties
+  const [activeConflict, setActiveConflict] = useState<number | null>(null); // index of the active conflict on dependencies list
   const [activeConflictLines, setActiveConflictLines] = useState<HTMLElement[]>([]); // lines of the active conflict
   const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
 
@@ -62,7 +63,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     return uniqueDependencies;
   };
 
-  const changeActiveConflict = (dep: dependency) => {
+  const changeActiveConflict = (dep: dependency, index: number) => {
     // remove the styles from the previous conflict
     if (activeConflictLines.length) {
       activeConflictLines.forEach((line) => {
@@ -96,6 +97,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // set the new conflict as active
     const newConflict = gotoDiffConflict(file, lineFrom, lineTo, modifiedLines);
     setActiveConflictLines(newConflict);
+    setActiveConflict(index);
   };
 
   useEffect(() => {
@@ -241,7 +243,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             {dependencies.map((d, i) => {
               return (
                 <li>
-                  <Conflict key={i} dependency={d} setConflict={changeActiveConflict} />
+                  <Conflict key={i} index={i} dependency={d} setConflict={changeActiveConflict} />
                 </li>
               );
             })}
