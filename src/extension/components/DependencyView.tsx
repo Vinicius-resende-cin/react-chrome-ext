@@ -3,7 +3,11 @@ import AnalysisService from "../../services/AnalysisService";
 import { dependency, modLine } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
-import { gotoDiffConflict, removeHighlight } from "../utils/diff-navigation";
+import {
+  gotoDiffConflict,
+  unsetAsConflictLine,
+  updateLocationFromStackTrace
+} from "../utils/diff-navigation";
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
@@ -29,29 +33,62 @@ interface DependencyViewProps {
 
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
   const [dependencies, setDependencies] = useState<dependency[]>([]);
-  const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean}>({}); // State to control if the code is collapsed or not
+  const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
   const [diff, setDiff] = useState<string>("");
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [activeConflict, setActiveConflict] = useState<HTMLElement[]>([]); // lines of the active conflict
+
+  const filterDuplicatedDependencies = (dependencies: dependency[]) => {
+    const uniqueDependencies: dependency[] = [];
+    dependencies.forEach((dep) => {
+      if (
+        !uniqueDependencies.some(
+          (d) =>
+            d.body.interference[0].location.file === dep.body.interference[0].location.file &&
+            d.body.interference[0].location.line === dep.body.interference[0].location.line &&
+            d.body.interference[d.body.interference.length - 1].location.file ===
+              dep.body.interference[dep.body.interference.length - 1].location.file &&
+            d.body.interference[d.body.interference.length - 1].location.line ===
+              dep.body.interference[dep.body.interference.length - 1].location.line
+        )
+      ) {
+        uniqueDependencies.push(dep);
+      }
+    });
+
+    return uniqueDependencies;
+  };
 
   const changeActiveConflict = (dep: dependency) => {
     // remove the styles from the previous conflict
     if (activeConflict.length) {
       activeConflict.forEach((line) => {
-        line.querySelectorAll("td").forEach((td) => {
-          td.classList.remove("d2h-ins-left");
-          td.classList.remove("d2h-ins");
-          td.classList.remove("d2h-del-left");
-          td.classList.remove("d2h-del");
-        });
-        removeHighlight(line);
+        unsetAsConflictLine(line);
       });
     }
 
     // get the filename and line numbers of the conflict
-    const file = dep.body.interference[0].location.file.replaceAll("\\", "/"); // filename
-    const lineFrom = dep.body.interference[0]; // first line
-    const lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+    let file = dep.body.interference[0].location.file.replaceAll("\\", "/"); // filename
+    let lineFrom = dep.body.interference[0]; // first line
+    let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+
+    if (file === "UNKNOWN") {
+      // conflict in an unknown file
+      // check if stack trace has a valid file
+      if (
+        !dep.body.interference[0].stackTrace ||
+        !dep.body.interference[dep.body.interference.length - 1].stackTrace
+      )
+        throw new Error("File not found: Invalid stack trace");
+
+      // get the stack trace file path
+      let javaFilePath = dep.body.interference[0].stackTrace[0].class.replaceAll(".", "/");
+
+      // assign the data based on stack trace
+      file = `${javaFilePath}.java`;
+      lineFrom.location.line = dep.body.interference[0].stackTrace[0].line;
+      lineTo.location.line = dep.body.interference[dep.body.interference.length - 1].stackTrace![0].line;
+    }
 
     // set the new conflict as active
     const newConflict = gotoDiffConflict(file, lineFrom, lineTo, modifiedLines);
@@ -60,7 +97,30 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
-      setDependencies(response.getDependencies());
+      let dependencies = response.getDependencies();
+      dependencies.forEach((dep) => {
+        if (
+          dep.body.interference[0].location.file === "UNKNOWN" ||
+          dep.body.interference[dep.body.interference.length - 1].location.file === "UNKNOWN"
+        )
+          updateLocationFromStackTrace(dep);
+      });
+      dependencies = filterDuplicatedDependencies(dependencies);
+
+      setDependencies(
+        dependencies.sort((a, b) => {
+          const aStartLine = a.body.interference[0].location.line;
+          const bStartLine = b.body.interference[0].location.line;
+          const aEndLine = a.body.interference[a.body.interference.length - 1].location.line;
+          const bEndLine = b.body.interference[b.body.interference.length - 1].location.line;
+
+          if (aStartLine < bStartLine) return -1;
+          if (aStartLine > bStartLine) return 1;
+          if (aEndLine < bEndLine) return -1;
+          if (aEndLine > bEndLine) return 1;
+          return 0;
+        })
+      );
       setDiff(response.getDiff());
       setModifiedLines(response.data.modifiedLines ?? []);
     });
@@ -121,63 +181,60 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     const checkboxInputs = document.querySelectorAll<HTMLElement>(".d2h-file-collapse-input");
 
     const handleChange = (event: Event) => {
-      const target = event.target as HTMLInputElement; 
+      const target = event.target as HTMLInputElement;
       const fileHeaderDiv = target.closest(".d2h-file-header");
       const fileNameSpan = fileHeaderDiv?.querySelector(".d2h-file-name");
       const fileName = fileNameSpan?.textContent || "";
       setIsCollapsed((prevState) => ({
         ...prevState,
-        [fileName]: target.checked,
+        [fileName]: target.checked
       }));
     };
-    
-    checkboxInputs.forEach((checkboxInput) =>{
+
+    checkboxInputs.forEach((checkboxInput) => {
       if (checkboxInput) {
         checkboxInput.addEventListener("change", handleChange);
       }
-    })
+    });
 
     // cleaning the event
     return () => {
-
-      checkboxInputs.forEach((checkboxInput) =>{
+      checkboxInputs.forEach((checkboxInput) => {
         if (checkboxInput) {
           checkboxInput.removeEventListener("change", handleChange);
         }
-      })
+      });
     };
   }, [diff]);
 
   //Collapsing the diff file checked as viewed
   useEffect(() => {
-    
     const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
-  
+
     // Add or remove the class `d2h-d-none` based on state `isCollapsed`
     diffFiles.forEach((diffFile) => {
       const fileName = diffFile.querySelector(".d2h-file-name")?.textContent || "";
       const diffContainer = diffFile.querySelector(".d2h-file-diff");
-      
+
       if (isCollapsed[fileName]) {
-        
         diffContainer?.classList.add("d2h-d-none");
       } else {
         diffContainer?.classList.remove("d2h-d-none");
       }
     });
-  
-    
   }, [isCollapsed]);
 
   return (
-    <>
+    <div id="dependency-plugin" className="tw-flex tw-flex-row tw-justify-between">
       {dependencies.length ? (
-        <div id="dependency-container">
-          <h3 className="tw-text-red-600">
-            {dependencies.length} conflito{dependencies.length > 1 ? "s" : ""} identificado
+        <div
+          id="dependency-container"
+          className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
+          <h3 className="tw-mb-5 tw-text-red-600">
+            {dependencies.length} possíveis conflito{dependencies.length > 1 ? "s" : ""} identificado
             {dependencies.length > 1 ? "s" : ""}:
           </h3>
-          <ul>
+          <ul className="tw-list-none">
             {dependencies.map((d, i) => {
               return (
                 <li>
@@ -194,7 +251,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       ) : null}
 
       {diff ? (
-        <div id="diff-container" className="tw-mb-3">
+        <div id="diff-container" className="tw-mb-3 tw-w-full">
           <h1>Diff</h1>
           {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
         </div>
@@ -204,6 +261,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
         </div>
       )}
-    </>
+    </div>
   );
 }

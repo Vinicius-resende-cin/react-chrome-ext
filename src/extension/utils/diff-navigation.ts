@@ -1,4 +1,4 @@
-import { interferenceNode, modLine } from "../../models/AnalysisOutput";
+import { interferenceNode, modLine, dependency } from "../../models/AnalysisOutput";
 
 const fadeOutBorder = (diffLine: HTMLElement) => {
   diffLine.classList.add("pl-fadeout-border");
@@ -46,6 +46,33 @@ const setColorFromBranch = (diffLine: HTMLElement, branch: "L" | "R", colorType:
   });
 };
 
+const removeLineColor = (diffLine: HTMLElement, modifiedLines?: modLine[]) => {
+  if (modifiedLines) {
+    const file = diffLine.id.split(":")[0];
+    const line = parseInt(diffLine.id.split(":")[1]);
+
+    const fileModifiedLines = modifiedLines.find((ml) => ml.file.endsWith(file) || file.endsWith(ml.file));
+    if (!fileModifiedLines) return;
+
+    if (
+      fileModifiedLines.leftAdded.includes(line) ||
+      fileModifiedLines.rightAdded.includes(line) ||
+      fileModifiedLines.leftRemoved.includes(line) ||
+      fileModifiedLines.rightRemoved.includes(line)
+    ) {
+      console.info(`Line ${line} of file ${file} was modified, not removing color`);
+      return;
+    }
+  }
+
+  diffLine.querySelectorAll("td").forEach((td) => {
+    td.classList.remove("d2h-ins-left");
+    td.classList.remove("d2h-ins");
+    td.classList.remove("d2h-del-left");
+    td.classList.remove("d2h-del");
+  });
+};
+
 const checkLineModificationType = (file: string, line: number) => {
   // get the diffLine element
   let diffLine = getDiffLine(file, line);
@@ -61,7 +88,15 @@ const checkLineModificationType = (file: string, line: number) => {
   else return null;
 };
 
-const findSourceBranch = (node: interferenceNode, modifiedLines: modLine[]) => {
+type sourceBranch = {
+  branch: "L" | "R";
+  lineType: "del" | "ins";
+};
+
+const findSourceBranch: (node: interferenceNode, modifiedLines: modLine[]) => sourceBranch | null = (
+  node: interferenceNode,
+  modifiedLines: modLine[]
+) => {
   // get the filename of the first node in the stack trace
   const firstNodeFromFile = node.stackTrace?.[0].class.split(".").pop() + ".java";
   if (!firstNodeFromFile) return null;
@@ -70,22 +105,29 @@ const findSourceBranch = (node: interferenceNode, modifiedLines: modLine[]) => {
   const firstNodeFromLine = node.stackTrace?.[0].line;
   if (!firstNodeFromLine) return null;
 
-  // check if the line is in the modified lines
-  const fileModifiedLines = modifiedLines.find((ml) => ml.file.endsWith(firstNodeFromFile));
-  if (!fileModifiedLines) return null;
-
+  // check if the node has already a set branch
   let branch: "L" | "R" | null = null;
-  if (
-    fileModifiedLines.leftAdded.includes(firstNodeFromLine) ||
-    fileModifiedLines.leftRemoved.includes(firstNodeFromLine)
-  )
-    branch = "L";
-  else if (
-    fileModifiedLines.rightAdded.includes(firstNodeFromLine) ||
-    fileModifiedLines.rightRemoved.includes(firstNodeFromLine)
-  )
-    branch = "R";
-  else return null;
+  if (node.branch) {
+    branch = node.branch;
+  } else {
+    // check if the line is in the modified lines
+    const fileModifiedLines = modifiedLines.find(
+      (ml) => ml.file.endsWith(firstNodeFromFile) || firstNodeFromFile.endsWith(ml.file)
+    );
+    if (!fileModifiedLines) return null;
+
+    if (
+      fileModifiedLines.leftAdded.includes(firstNodeFromLine) ||
+      fileModifiedLines.leftRemoved.includes(firstNodeFromLine)
+    )
+      branch = "L";
+    else if (
+      fileModifiedLines.rightAdded.includes(firstNodeFromLine) ||
+      fileModifiedLines.rightRemoved.includes(firstNodeFromLine)
+    )
+      branch = "R";
+    else return null;
+  }
 
   // check if the line was added or removed
   const lineType: "ins" | "del" | "change" | null = checkLineModificationType(
@@ -95,6 +137,54 @@ const findSourceBranch = (node: interferenceNode, modifiedLines: modLine[]) => {
   if (!lineType) return null;
 
   return { branch, lineType: lineType === "change" ? "ins" : lineType };
+};
+
+const setAsConflictLine = (diffLine: HTMLElement, srcBranch: sourceBranch | null) => {
+  // set the colors of the lines
+  if (srcBranch) setColorFromBranch(diffLine, srcBranch.branch, srcBranch.lineType);
+  else highlight(diffLine);
+
+  // set the conflict line class
+  diffLine.classList.add("pl-conflict-line");
+
+  // change the left line number
+  const leftLineNumber = diffLine.querySelector(".line-num1") as HTMLElement;
+  leftLineNumber.setAttribute("prev-text", leftLineNumber.textContent || "");
+  leftLineNumber.textContent = " →";
+};
+
+const unsetAsConflictLine = (diffLine: HTMLElement) => {
+  removeLineColor(diffLine);
+  removeHighlight(diffLine);
+  diffLine.classList.remove("pl-conflict-line");
+
+  // change back the left line number
+  const leftLineNumber = diffLine.querySelector(".line-num1") as HTMLElement;
+  leftLineNumber.textContent = leftLineNumber.getAttribute("prev-text") || "";
+  leftLineNumber.removeAttribute("prev-text");
+};
+
+const updateLocationFromStackTrace = (dep: dependency) => {
+  if (
+    !dep.body.interference[0].stackTrace ||
+    !dep.body.interference[dep.body.interference.length - 1].stackTrace
+  )
+    throw new Error("File not found: Invalid stack trace");
+
+  const stackTrace0 = dep.body.interference[0].stackTrace[0];
+  const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
+
+  const stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
+  const fileN = stackTraceN.class.replaceAll(".", "/") + ".java";
+
+  dep.body.interference[0].location.file = file0;
+  dep.body.interference[0].location.line = stackTrace0.line;
+  dep.body.interference[0].location.class = stackTrace0.class;
+  dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
+  dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
+  dep.body.interference[dep.body.interference.length - 1].location.class = stackTraceN.class;
+
+  return dep;
 };
 
 const getDiffLine = (file: string, line: number) => {
@@ -141,12 +231,9 @@ const gotoDiffConflict = (
   const sourceBranchFrom = findSourceBranch(l1, modifiedLines);
   const sourceBranchTo = findSourceBranch(l2, modifiedLines);
 
-  // set the colors of the lines
-  if (sourceBranchFrom) setColorFromBranch(lineFrom, sourceBranchFrom.branch, sourceBranchFrom.lineType);
-  else highlight(lineFrom);
-
-  if (sourceBranchTo) setColorFromBranch(lineTo, sourceBranchTo.branch, sourceBranchTo.lineType);
-  else highlight(lineTo);
+  // set the conflict line style
+  setAsConflictLine(lineFrom, sourceBranchFrom);
+  setAsConflictLine(lineTo, sourceBranchTo);
 
   // set navigation between both lines
   lineFrom.onclick = () => {
@@ -163,4 +250,14 @@ const gotoDiffConflict = (
   return [lineFrom, lineTo];
 };
 
-export { gotoDiffConflict, highlight, removeHighlight, scrollAndHighlight, getDiffLine };
+export {
+  gotoDiffConflict,
+  highlight,
+  removeHighlight,
+  setAsConflictLine,
+  unsetAsConflictLine,
+  removeLineColor,
+  scrollAndHighlight,
+  getDiffLine,
+  updateLocationFromStackTrace
+};
