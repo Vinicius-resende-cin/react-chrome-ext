@@ -159,6 +159,9 @@ const unsetAsConflictLine = (diffLine: HTMLElement, modifiedLines: modLine[]) =>
   removeHighlight(diffLine);
   diffLine.classList.remove("pl-conflict-line");
 
+  // remove event listeners
+  diffLine.onclick = null;
+
   // change back the left line number
   const leftLineNumber = diffLine.querySelector(".line-num1") as HTMLElement;
   leftLineNumber.textContent = leftLineNumber.getAttribute("prev-text") || "";
