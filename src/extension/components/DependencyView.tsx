@@ -77,8 +77,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
     let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
+    // if the filename is unknown, try to get the first valid one from the stack trace
     if (fileFrom === "UNKNOWN" || fileTo === "UNKNOWN") {
-      updateLocationFromStackTrace(dep);
+      updateLocationFromStackTrace(dep, { inplace: true });
       fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/");
       fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/");
     }
@@ -97,7 +98,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           dep.body.interference[0].location.file === "UNKNOWN" ||
           dep.body.interference[dep.body.interference.length - 1].location.file === "UNKNOWN"
         )
-          updateLocationFromStackTrace(dep);
+          updateLocationFromStackTrace(dep, { inplace: true });
       });
       dependencies = filterDuplicatedDependencies(dependencies);
 

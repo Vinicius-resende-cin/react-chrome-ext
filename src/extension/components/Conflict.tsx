@@ -14,7 +14,7 @@ type locationStrings = {
 
 export default function Conflict({ index, dependency, setConflict }: ConflictProps) {
   const getLocationFromStackTrace: (dep: dependency) => locationStrings = (dep: dependency) => {
-    const newDep = updateLocationFromStackTrace(dep);
+    const newDep = updateLocationFromStackTrace(dep, { inplace: true });
 
     const class0 = newDep.body.interference[0].location.class;
     const line0 = newDep.body.interference[0].location.line;
