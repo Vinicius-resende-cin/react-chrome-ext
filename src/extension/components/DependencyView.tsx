@@ -11,6 +11,7 @@ import {
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
+const linesToExpand = 3;
 
 const diffConfig: Diff2HtmlConfig = {
   outputFormat: "line-by-line",
@@ -247,7 +248,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
   }, [isCollapsed]);
 
-    //function to reveal 3 lines to up
+    //function to reveal lines to up
    const expandTop = (diffFile: HTMLElement) => {
     const lines = diffFile.querySelectorAll("tr");
     let firstVisibleIndex = -1;
@@ -260,10 +261,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
 
     //checking if the range is safe
-    if (firstVisibleIndex - 3 < 0){
+    if (firstVisibleIndex - linesToExpand < 0){
       limit = 0;
     }else{
-      limit = firstVisibleIndex - 3;
+      limit = firstVisibleIndex - linesToExpand;
     }
 
     for (let i = firstVisibleIndex - 1; i >= limit ; i--) {
@@ -271,7 +272,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
   };
 
-  //function to show 3 lines to down
+  //function to show lines to down
   const expandBottom = (diffFile: HTMLElement) => {
     const lines = diffFile.querySelectorAll("tr");
     let lastVisibleIndex = -1;
@@ -284,10 +285,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
 
     //checking if the range is safe
-    if (lastVisibleIndex + 3 > lines.length){
+    if (lastVisibleIndex + linesToExpand > lines.length){
       limit = lines.length;
     }else{
-      limit = lastVisibleIndex + 3;
+      limit = lastVisibleIndex + linesToExpand;
     }
 
     for (let i = lastVisibleIndex + 1; i < limit; i++) {
@@ -309,8 +310,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       bottomButton.classList.add("tw-mt-2", "tw-px-4", "tw-bg-green-500", "tw-text-white");
       bottomButton.onclick = () => expandBottom(diffFile);
 
-      diffFile.insertAdjacentElement("beforebegin", topButton);
-      diffFile.insertAdjacentElement("afterend", bottomButton);
+      diffFile.insertAdjacentElement("afterbegin", topButton);
+      diffFile.insertAdjacentElement("beforeend", bottomButton);
     });
   }, [diff]);
 
