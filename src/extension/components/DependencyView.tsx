@@ -173,7 +173,30 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         }
       }
     };
+
+    //function to showing only context lines
+    const collapsedViewed = () => {
+      const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
+
+      diffFiles.forEach((diffFile) => {
+        const lines = diffFile.querySelectorAll("tr");
+        let linesAlreadyShown = new Set<number>();
+
+        //Checking the changed lines
+        lines.forEach((line, index) => {
+          if (line.querySelector('.d2h-ins') || line.querySelector('.d2h-del')) {
+            for (let i = Math.max(0, index - 3); i <= Math.min(lines.length - 1, index + 3); i++) {
+              lines[i].classList.remove("d2h-d-none");
+              linesAlreadyShown.add(i);
+            }
+          }else if (!linesAlreadyShown.has(index)) {
+            line.classList.add("d2h-d-none");
+          }
+        })
+      })
+    }
     updateDiffColors();
+    collapsedViewed();
   }, [modifiedLines]);
 
   // adding the listingEventChange on input viewed
@@ -223,6 +246,73 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       }
     });
   }, [isCollapsed]);
+
+    //function to reveal 3 lines to up
+   const expandTop = (diffFile: HTMLElement) => {
+    const lines = diffFile.querySelectorAll("tr");
+    let firstVisibleIndex = -1;
+    let limit = -1;
+
+    lines.forEach((line, index) => {
+      if (!line.classList.contains('d2h-d-none') && firstVisibleIndex === -1) {
+        firstVisibleIndex = index;
+      }
+    });
+
+    //checking if the range is safe
+    if (firstVisibleIndex - 3 < 0){
+      limit = 0;
+    }else{
+      limit = firstVisibleIndex - 3;
+    }
+
+    for (let i = firstVisibleIndex - 1; i >= limit ; i--) {
+      lines[i].classList.remove("d2h-d-none");
+    }
+  };
+
+  //function to show 3 lines to down
+  const expandBottom = (diffFile: HTMLElement) => {
+    const lines = diffFile.querySelectorAll("tr");
+    let lastVisibleIndex = -1;
+    let limit = -1;
+
+    lines.forEach((line, index) => {
+      if (!line.classList.contains('d2h-d-none')) {
+        lastVisibleIndex = index;
+      }
+    });
+
+    //checking if the range is safe
+    if (lastVisibleIndex + 3 > lines.length){
+      limit = lines.length;
+    }else{
+      limit = lastVisibleIndex + 3;
+    }
+
+    for (let i = lastVisibleIndex + 1; i < limit; i++) {
+      lines[i].classList.remove("d2h-d-none");
+    }
+  };
+
+  useEffect(() => {
+    const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
+
+    diffFiles.forEach((diffFile) => {
+      const topButton = document.createElement("button");
+      topButton.textContent = "Expand Top";
+      topButton.classList.add("tw-mb-2", "tw-px-4", "tw-bg-blue-500", "tw-text-white");
+      topButton.onclick = () => expandTop(diffFile);
+
+      const bottomButton = document.createElement("button");
+      bottomButton.textContent = "Expand Bottom";
+      bottomButton.classList.add("tw-mt-2", "tw-px-4", "tw-bg-green-500", "tw-text-white");
+      bottomButton.onclick = () => expandBottom(diffFile);
+
+      diffFile.insertAdjacentElement("beforebegin", topButton);
+      diffFile.insertAdjacentElement("afterend", bottomButton);
+    });
+  }, [diff]);
 
   return (
     <div id="dependency-plugin" className="tw-flex tw-flex-row tw-justify-between">

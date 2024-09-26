@@ -324,6 +324,9 @@
 .d2h-code-side-linenumber {
   direction: rtl;
 }
+.d2h-d-none {
+  display: none;
+}
 .d2h-del {
   background-color: #fee8e9;
   background-color: var(--d2h-del-bg-color);
