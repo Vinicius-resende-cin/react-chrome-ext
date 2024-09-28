@@ -63,6 +63,29 @@
   --d2h-dark-change-label-color: #d29922;
   --d2h-dark-moved-label-color: #3572b0;
 }
+.button-container {
+  background-color: #f1f8ff;
+  display: flex; 
+  justify-content: flex-start; 
+  height: 25px;
+}
+.button-style {
+  background-color: #A4C8FF; 
+  border: none; 
+  color: #7A7C80;
+  padding: 5px 10px;
+  width: 98px;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.button-style:hover {
+  background-color: #0366d6; 
+}
 .d2h-wrapper {
   text-align: left;
 }
