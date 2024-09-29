@@ -300,18 +300,32 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
 
     diffFiles.forEach((diffFile) => {
+
+      const topButtonContainer = document.createElement("div");
+      topButtonContainer.classList.add("button-container");
+
+      const bottomButtonContainer = document.createElement("div");
+      bottomButtonContainer.classList.add("button-container");
+
       const topButton = document.createElement("button");
-      topButton.textContent = "Expand Top";
-      topButton.classList.add("tw-mb-2", "tw-px-4", "tw-bg-blue-500", "tw-text-white");
+      topButton.innerHTML = "&#x25B2;";
+      topButton.classList.add("button-style");
       topButton.onclick = () => expandTop(diffFile);
+      topButton.title = "Expand Up";
 
       const bottomButton = document.createElement("button");
-      bottomButton.textContent = "Expand Bottom";
-      bottomButton.classList.add("tw-mt-2", "tw-px-4", "tw-bg-green-500", "tw-text-white");
+      bottomButton.innerHTML = "&#x25BC;";
+      bottomButton.classList.add("button-style");
       bottomButton.onclick = () => expandBottom(diffFile);
+      bottomButton.title = "Expand Down";
 
-      diffFile.insertAdjacentElement("afterbegin", topButton);
-      diffFile.insertAdjacentElement("beforeend", bottomButton);
+      topButtonContainer.appendChild(topButton);
+      bottomButtonContainer.appendChild(bottomButton);
+
+      const fileDiff = diffFile.querySelector(".d2h-file-diff");
+
+      fileDiff?.insertAdjacentElement("beforebegin", topButtonContainer);
+      fileDiff?.insertAdjacentElement("afterend", bottomButtonContainer);
     });
   }, [diff]);
 
