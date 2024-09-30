@@ -239,11 +239,17 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     diffFiles.forEach((diffFile) => {
       const fileName = diffFile.querySelector(".d2h-file-name")?.textContent || "";
       const diffContainer = diffFile.querySelector(".d2h-file-diff");
+      const buttonTop = diffFile.querySelector(".button-top");
+      const buttonDown = diffFile.querySelector(".button-down");
 
       if (isCollapsed[fileName]) {
         diffContainer?.classList.add("d2h-d-none");
+        buttonTop?.classList.add("d2h-d-none");
+        buttonDown?.classList.add("d2h-d-none");
       } else {
         diffContainer?.classList.remove("d2h-d-none");
+        buttonTop?.classList.remove("d2h-d-none");
+        buttonDown?.classList.remove("d2h-d-none");
       }
     });
   }, [isCollapsed]);
@@ -302,10 +308,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     diffFiles.forEach((diffFile) => {
 
       const topButtonContainer = document.createElement("div");
-      topButtonContainer.classList.add("button-container");
+      topButtonContainer.classList.add("button-container", "button-top");
 
       const bottomButtonContainer = document.createElement("div");
-      bottomButtonContainer.classList.add("button-container");
+      bottomButtonContainer.classList.add("button-container", "button-down");
 
       const topButton = document.createElement("button");
       topButton.innerHTML = "&#x25B2;";
