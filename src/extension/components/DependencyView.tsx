@@ -257,6 +257,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     //function to reveal lines to up
    const expandTop = (diffFile: HTMLElement) => {
     const lines = diffFile.querySelectorAll("tr");
+    const button = diffFile.querySelector(".button-top");
     let firstVisibleIndex = -1;
     let limit = -1;
 
@@ -267,10 +268,11 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
 
     //checking if the range is safe
-    if (firstVisibleIndex - linesToExpand < 0){
+    if (firstVisibleIndex - (2 * linesToExpand) < 0){
       limit = 0;
+      button?.classList.add("d2h-d-none");
     }else{
-      limit = firstVisibleIndex - linesToExpand;
+      limit = firstVisibleIndex - (2 * linesToExpand);
     }
 
     for (let i = firstVisibleIndex - 1; i >= limit ; i--) {
@@ -281,6 +283,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   //function to show lines to down
   const expandBottom = (diffFile: HTMLElement) => {
     const lines = diffFile.querySelectorAll("tr");
+    const button = diffFile.querySelector(".button-down");
     let lastVisibleIndex = -1;
     let limit = -1;
 
@@ -291,10 +294,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
 
     //checking if the range is safe
-    if (lastVisibleIndex + linesToExpand > lines.length){
+    if (lastVisibleIndex + (2 * linesToExpand) > lines.length){
       limit = lines.length;
+      button?.classList.add("d2h-d-none");
+
     }else{
-      limit = lastVisibleIndex + linesToExpand;
+      limit = lastVisibleIndex + (2 * linesToExpand);
     }
 
     for (let i = lastVisibleIndex + 1; i < limit; i++) {
