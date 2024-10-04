@@ -63,6 +63,29 @@
   --d2h-dark-change-label-color: #d29922;
   --d2h-dark-moved-label-color: #3572b0;
 }
+.button-container {
+  background-color: #f1f8ff;
+  display: flex; 
+  justify-content: flex-start; 
+  height: 25px;
+}
+.button-style {
+  background-color: #A4C8FF; 
+  border: none; 
+  color: #7A7C80;
+  padding: 5px 10px;
+  width: 98px;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.button-style:hover {
+  background-color: #0366d6; 
+}
 .d2h-wrapper {
   text-align: left;
 }
@@ -323,6 +346,9 @@
 .d2h-code-linenumber,
 .d2h-code-side-linenumber {
   direction: rtl;
+}
+.d2h-d-none {
+  display: none;
 }
 .d2h-del {
   background-color: #fee8e9;
@@ -626,6 +652,12 @@
   border: 1px solid var(--d2h-dark-moved-label-color);
 }
 @media (prefers-color-scheme: dark) {
+  .button-container {
+    background-color: #388bfd1a;
+  }
+  .button-style {
+    background-color: #388bfd66;
+  }
   .d2h-auto-color-scheme {
     background-color: #0d1117;
     background-color: var(--d2h-dark-bg-color);

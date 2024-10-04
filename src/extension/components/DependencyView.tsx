@@ -11,6 +11,7 @@ import {
 import Conflict from "./Conflict";
 
 const analysisService = new AnalysisService();
+const linesToExpand = 3;
 
 const diffConfig: Diff2HtmlConfig = {
   outputFormat: "line-by-line",
@@ -192,7 +193,30 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         }
       }
     };
+
+    //function to showing only context lines
+    const collapsedViewed = () => {
+      const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
+
+      diffFiles.forEach((diffFile) => {
+        const lines = diffFile.querySelectorAll("tr");
+        let linesAlreadyShown = new Set<number>();
+
+        //Checking the changed lines
+        lines.forEach((line, index) => {
+          if (line.querySelector('.d2h-ins') || line.querySelector('.d2h-del')) {
+            for (let i = Math.max(0, index - 3); i <= Math.min(lines.length - 1, index + 3); i++) {
+              lines[i].classList.remove("d2h-d-none");
+              linesAlreadyShown.add(i);
+            }
+          }else if (!linesAlreadyShown.has(index)) {
+            line.classList.add("d2h-d-none");
+          }
+        })
+      })
+    }
     updateDiffColors();
+    collapsedViewed();
   }, [modifiedLines]);
 
   // adding the listingEventChange on input viewed
@@ -234,14 +258,101 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     diffFiles.forEach((diffFile) => {
       const fileName = diffFile.querySelector(".d2h-file-name")?.textContent || "";
       const diffContainer = diffFile.querySelector(".d2h-file-diff");
+      const buttonTop = diffFile.querySelector(".button-top");
+      const buttonDown = diffFile.querySelector(".button-down");
 
       if (isCollapsed[fileName]) {
         diffContainer?.classList.add("d2h-d-none");
+        buttonTop?.classList.add("d2h-d-none");
+        buttonDown?.classList.add("d2h-d-none");
       } else {
         diffContainer?.classList.remove("d2h-d-none");
+        buttonTop?.classList.remove("d2h-d-none");
+        buttonDown?.classList.remove("d2h-d-none");
       }
     });
   }, [isCollapsed]);
+
+    //function to reveal lines to up
+   const expandTop = (diffFile: HTMLElement) => {
+    const lines = diffFile.querySelectorAll("tr");
+    let firstVisibleIndex = -1;
+    let limit = -1;
+
+    lines.forEach((line, index) => {
+      if (!line.classList.contains('d2h-d-none') && firstVisibleIndex === -1) {
+        firstVisibleIndex = index;
+      }
+    });
+
+    //checking if the range is safe
+    if (firstVisibleIndex - linesToExpand < 0){
+      limit = 0;
+    }else{
+      limit = firstVisibleIndex - linesToExpand;
+    }
+
+    for (let i = firstVisibleIndex - 1; i >= limit ; i--) {
+      lines[i].classList.remove("d2h-d-none");
+    }
+  };
+
+  //function to show lines to down
+  const expandBottom = (diffFile: HTMLElement) => {
+    const lines = diffFile.querySelectorAll("tr");
+    let lastVisibleIndex = -1;
+    let limit = -1;
+
+    lines.forEach((line, index) => {
+      if (!line.classList.contains('d2h-d-none')) {
+        lastVisibleIndex = index;
+      }
+    });
+
+    //checking if the range is safe
+    if (lastVisibleIndex + linesToExpand > lines.length){
+      limit = lines.length;
+    }else{
+      limit = lastVisibleIndex + linesToExpand;
+    }
+
+    for (let i = lastVisibleIndex + 1; i < limit; i++) {
+      lines[i].classList.remove("d2h-d-none");
+    }
+  };
+
+  useEffect(() => {
+    const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
+
+    diffFiles.forEach((diffFile) => {
+
+      const topButtonContainer = document.createElement("div");
+      topButtonContainer.classList.add("button-container", "button-top");
+
+      const bottomButtonContainer = document.createElement("div");
+      bottomButtonContainer.classList.add("button-container", "button-down");
+
+      const topButton = document.createElement("button");
+      topButton.innerHTML = "&#x25B2;";
+      topButton.classList.add("button-style");
+      topButton.onclick = () => expandTop(diffFile);
+      topButton.title = "Expand Up";
+
+      const bottomButton = document.createElement("button");
+      bottomButton.innerHTML = "&#x25BC;";
+      bottomButton.classList.add("button-style");
+      bottomButton.onclick = () => expandBottom(diffFile);
+      bottomButton.title = "Expand Down";
+
+      topButtonContainer.appendChild(topButton);
+      bottomButtonContainer.appendChild(bottomButton);
+
+      const fileDiff = diffFile.querySelector(".d2h-file-diff");
+
+      fileDiff?.insertAdjacentElement("beforebegin", topButtonContainer);
+      fileDiff?.insertAdjacentElement("afterend", bottomButtonContainer);
+    });
+  }, [diff]);
 
   return (
     <div id="dependency-plugin">
