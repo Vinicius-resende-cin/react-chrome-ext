@@ -49,7 +49,7 @@ function loadCSS(tabId: number, cssFiles: string[]) {
         target: { tabId: tabId },
         files: [`./js/${file}.css`]
       },
-      () => console.log("CSS loaded")
+      () => console.log(`${file}.css loaded`)
     );
   });
 }
