@@ -4,13 +4,10 @@
  */
 function insertNavTab(tabId: number) {
   // add the new tab button
-  chrome.scripting.executeScript(
-    {
-      target: { tabId: tabId },
-      files: ["./js/insert-nav-tab.js"]
-    },
-    () => console.log("Dependencies tab inserted")
-  );
+  chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    files: ["./js/insert-nav-tab.js"]
+  });
 }
 
 /**
@@ -52,29 +49,40 @@ function loadCSS(tabId: number, cssFiles: string[]) {
         target: { tabId: tabId },
         files: [`./js/${file}.css`]
       },
-      () => console.log("CSS loaded")
+      () => console.log(`${file}.css loaded`)
     );
   });
 }
 
+// Injection logic for the styles and scripts (based on https://github.com/Justineo/github-hovercard 's logic)
+const GITHUB_DOMAIN = "github.com";
+
 /**
- * Checks if the url is a github pull request.
- * @param url the url to check
- * @returns true if the url is a github pull request, false otherwise
+ * Inject the files when a navigation event is triggered.
+ * @param details the details of the navigation
  */
-function isUrlGithubPullRequest(url: string): boolean {
-  const urlRegex = /^https:\/\/github.com\/.*\/pull\/\d+.*$/;
-  return urlRegex.test(url);
-}
-
-// Listen for changes in the Hystory (event happens after DOM is loaded and doesnt fail when the page is loaded dynamically)
-chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-  // Check if the url is a github pull request
-  if (!isUrlGithubPullRequest(details.url)) return;
-
+const injector = (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
   loadCSS(details.tabId, ["diff2html", "tailwind", "dependency-plugin"]);
   insertNavTab(details.tabId);
-});
+};
+
+/**
+ * Binds the injector to the webNavigation event.
+ */
+const bindInjector = () => {
+  if (chrome.webNavigation.onCommitted.hasListener(injector)) {
+    chrome.webNavigation.onCommitted.removeListener(injector);
+  }
+  chrome.webNavigation.onCommitted.addListener(injector, {
+    url: [{ hostEquals: GITHUB_DOMAIN }]
+  });
+};
+
+// inject the files when the extension is installed or updated
+chrome.runtime.onInstalled.addListener(bindInjector);
+
+// inject the files when the extension is reloaded
+bindInjector();
 
 // Listen for messages from the content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
