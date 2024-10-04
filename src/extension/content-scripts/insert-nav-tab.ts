@@ -11,6 +11,23 @@ function isUrlGithubPullRequest(url: string): boolean {
 }
 
 /**
+ * Checks if the url is already on the dependencies page.
+ * @param url the url to check
+ * @returns true if the url is already on the dependencies page, false otherwise
+ */
+function isAlreadyOnDependenciesUrl(url: string): boolean {
+  return url.endsWith(DEPENDENCIES_URL);
+}
+
+/**
+ * Sends a message to the extension to go to the dependencies page.
+ */
+async function gotoDependencies() {
+  const response = await chrome.runtime.sendMessage({ message: "goto-dependencies" });
+  console.log(response);
+}
+
+/**
  * Inserts the dependencies tab in the pull request page.
  */
 const insertNavTab = () => {
@@ -22,28 +39,38 @@ const insertNavTab = () => {
   if (nav === null) return console.warn("nav not found");
 
   queueTask(() =>
-    runSilent(() => {
-      // check if the tab already exists
-      const existingTab = nav.querySelector(`.tabnav-tab[href='${DEPENDENCIES_URL}']`);
-      if (existingTab !== null) {
-        return;
-      } else {
-        // create a new tab
-        const tab = document.createElement("a");
-        tab.classList.add("tabnav-tab");
-        tab.classList.add("flex-shrink-0");
-        tab.href = DEPENDENCIES_URL;
-        tab.innerHTML = "Dependencies";
+    runSilent(
+      () => {
+        // check if the tab already exists
+        const existingTab = nav.querySelector(`.tabnav-tab[href='${DEPENDENCIES_URL}']`);
+        if (existingTab !== null) {
+          return;
+        } else {
+          // create a new tab
+          const tab = document.createElement("a");
+          tab.classList.add("tabnav-tab");
+          tab.classList.add("flex-shrink-0");
+          tab.href = DEPENDENCIES_URL;
+          tab.innerHTML = "Dependencies";
 
-        // sends a message to the extension when clicked
-        tab.addEventListener("click", async () => {
-          const response = await chrome.runtime.sendMessage({ message: "goto-dependencies" });
-          console.log(response);
-        });
+          // sends a message to the extension when clicked
+          tab.addEventListener("click", async () => {
+            if (isAlreadyOnDependenciesUrl(window.location.href) && tab.classList.contains("selected"))
+              return;
+            await gotoDependencies();
+          });
 
-        nav.appendChild(tab);
+          nav.appendChild(tab);
+        }
+      },
+      // goes to the dependencies page if the url is already on it and the content is not loaded
+      async () => {
+        const content = document.querySelector("#dependencies-content-root");
+        if (isAlreadyOnDependenciesUrl(window.location.href) && !content) {
+          await gotoDependencies();
+        }
       }
-    })
+    )
   );
 };
 
@@ -84,9 +111,10 @@ const nextTick = (fn: () => void) => {
  * Runs a method without observer callbacks.
  * @param fn the method to run
  */
-const runSilent = (fn: () => void) => {
+const runSilent = async (fn: () => void, callback?: () => Promise<void>) => {
   stopObserve();
   fn();
+  if (callback) await callback();
 
   // nextTick will run **after** MutationObserver callbacks
   nextTick(startObserve);
