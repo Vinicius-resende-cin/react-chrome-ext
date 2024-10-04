@@ -20,9 +20,29 @@ function isAlreadyOnDependenciesUrl(url: string): boolean {
 }
 
 /**
+ * Checks if the url is on the commits tab.
+ * @param url the url to check
+ * @returns the url without the commits part if it is on the commits tab, null otherwise
+ */
+function isOnCommitsTab(url: string) {
+  const urlRegex = /^(https:\/\/github.com\/.*\/pull\/\d+)(.*)$/;
+  const groups = urlRegex.exec(url);
+  if (groups?.[2].startsWith("/commits")) return groups[1];
+  return null;
+}
+
+/**
  * Sends a message to the extension to go to the dependencies page.
  */
 async function gotoDependencies() {
+  // check if the url is on the commits tab
+  const baseUrl = isOnCommitsTab(window.location.href);
+  if (baseUrl) {
+    window.location.href = `${baseUrl}${DEPENDENCIES_URL}`;
+    return;
+  }
+
+  // send a message to the extension
   const response = await chrome.runtime.sendMessage({ message: "goto-dependencies" });
   console.log(response);
 }
@@ -35,14 +55,19 @@ const insertNavTab = () => {
   if (!isUrlGithubPullRequest(window.location.href)) return;
 
   // get the nav element
-  const nav = document.querySelector("[aria-label='Pull request tabs']");
-  if (nav === null) return console.warn("nav not found");
+  let navElement = document.querySelector("[aria-label='Pull request tabs']");
+  let navTabs = navElement;
+  if (!navElement) {
+    navElement = document.querySelector("[aria-label='Pull request navigation tabs']");
+    navTabs = navElement?.firstElementChild ?? null;
+  }
+  if (!navElement || !navTabs) return console.warn("nav not found");
 
   queueTask(() =>
     runSilent(
       () => {
         // check if the tab already exists
-        const existingTab = nav.querySelector(`.tabnav-tab[href='${DEPENDENCIES_URL}']`);
+        const existingTab = navTabs!.querySelector(`.tabnav-tab[href='${DEPENDENCIES_URL}']`);
         if (existingTab !== null) {
           return;
         } else {
@@ -60,7 +85,7 @@ const insertNavTab = () => {
             await gotoDependencies();
           });
 
-          nav.appendChild(tab);
+          navTabs!.appendChild(tab);
         }
       },
       // goes to the dependencies page if the url is already on it and the content is not loaded
