@@ -313,7 +313,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let firstLineAfterButton = -1;
     let limit = -1;
     let linesExpandeds = lineIndex + (2 * linesToExpand);
-    console.log(lineIndex);
+    
     lines.forEach((line, index) => {
       if (!line.classList.contains('d2h-d-none') && (index > lineIndex) && firstLineAfterButton == -1) {
         firstLineAfterButton = index;
