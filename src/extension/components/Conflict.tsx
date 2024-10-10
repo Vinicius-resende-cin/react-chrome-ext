@@ -2,8 +2,9 @@ import { dependency } from "../../models/AnalysisOutput";
 import { updateLocationFromStackTrace } from "../utils/diff-navigation";
 
 interface ConflictProps {
+  index: number;
   dependency: dependency;
-  setConflict: (dep: dependency) => void;
+  setConflict: (index: number) => void;
 }
 
 type locationStrings = {
@@ -11,9 +12,9 @@ type locationStrings = {
   to: string;
 };
 
-export default function Conflict({ dependency, setConflict }: ConflictProps) {
+export default function Conflict({ index, dependency, setConflict }: ConflictProps) {
   const getLocationFromStackTrace: (dep: dependency) => locationStrings = (dep: dependency) => {
-    const newDep = updateLocationFromStackTrace(dep);
+    const newDep = updateLocationFromStackTrace(dep, { inplace: true });
 
     const class0 = newDep.body.interference[0].location.class;
     const line0 = newDep.body.interference[0].location.line;
@@ -43,7 +44,7 @@ export default function Conflict({ dependency, setConflict }: ConflictProps) {
   const locationStrings = getLocationStrings(dependency);
 
   return (
-    <div className="tw-mb-3 tw-cursor-pointer tw-w-fit" onClick={() => setConflict(dependency)}>
+    <div className="tw-mb-3 tw-cursor-pointer tw-w-fit" onClick={() => setConflict(index)}>
       <span>
         {dependency.label} ({dependency.type})&nbsp;
       </span>
