@@ -1,4 +1,4 @@
-import { interferenceNode, modLine, dependency } from "../../models/AnalysisOutput";
+import { interferenceNode, modLine, dependency, tracedNode } from "../../models/AnalysisOutput";
 
 const fadeOutBorder = (diffLine: HTMLElement) => {
   diffLine.classList.add("pl-fadeout-border");
@@ -60,7 +60,7 @@ const removeLineColor = (diffLine: HTMLElement, modifiedLines?: modLine[]) => {
       fileModifiedLines.leftRemoved.includes(line) ||
       fileModifiedLines.rightRemoved.includes(line)
     ) {
-      console.info(`Line ${line} of file ${file} was modified, not removing color`);
+      console.info(`Line ${line} of file ${file} was modified, the color will be maintained`);
       return;
     }
   }
@@ -153,10 +153,14 @@ const setAsConflictLine = (diffLine: HTMLElement, srcBranch: sourceBranch | null
   leftLineNumber.textContent = " →";
 };
 
-const unsetAsConflictLine = (diffLine: HTMLElement) => {
-  removeLineColor(diffLine);
+const unsetAsConflictLine = (diffLine: HTMLElement, modifiedLines: modLine[]) => {
+  // remove styles
+  removeLineColor(diffLine, modifiedLines);
   removeHighlight(diffLine);
   diffLine.classList.remove("pl-conflict-line");
+
+  // remove event listeners
+  diffLine.onclick = null;
 
   // change back the left line number
   const leftLineNumber = diffLine.querySelector(".line-num1") as HTMLElement;
@@ -164,27 +168,82 @@ const unsetAsConflictLine = (diffLine: HTMLElement) => {
   leftLineNumber.removeAttribute("prev-text");
 };
 
-const updateLocationFromStackTrace = (dep: dependency) => {
+const getLastValidNode = (stackTrace: tracedNode[]) => {
+  // get all the diff file elements
+  let diffFiles: NodeListOf<Element> | Element[] | undefined = document
+    .getElementById("diff-container")
+    ?.querySelectorAll(".d2h-file-wrapper");
+  if (!diffFiles) throw new Error("Diff not found");
+  diffFiles = Array.from(diffFiles);
+
+  let cur = stackTrace.length - 1;
+  while (cur >= 0) {
+    const file = stackTrace[cur].class.replaceAll(".", "/") + ".java";
+
+    // get the diff element of the file
+    const diffContent = diffFiles.filter((diffFile) => {
+      const fileName = diffFile.querySelector(".d2h-file-name")?.textContent;
+      return fileName?.endsWith(file);
+    })[0];
+
+    // check if is a valid node
+    if (!diffContent) {
+      cur--;
+    } else {
+      return stackTrace[cur];
+    }
+  }
+  return stackTrace[0];
+};
+
+const updateLocationFromStackTrace = (
+  dep: dependency,
+  options?: { inplace?: boolean; mode?: "default" | "deep" }
+) => {
   if (
     !dep.body.interference[0].stackTrace ||
     !dep.body.interference[dep.body.interference.length - 1].stackTrace
   )
     throw new Error("File not found: Invalid stack trace");
 
-  const stackTrace0 = dep.body.interference[0].stackTrace[0];
-  const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
+  const inplace: boolean = options?.inplace || false;
+  const mode: "default" | "deep" = options?.mode || "default";
 
-  const stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
+  let stackTrace0: tracedNode;
+  let stackTraceN: tracedNode;
+
+  if (mode === "deep") {
+    stackTrace0 = getLastValidNode(dep.body.interference[0].stackTrace);
+    stackTraceN = getLastValidNode(dep.body.interference[dep.body.interference.length - 1].stackTrace!);
+  } else {
+    stackTrace0 = dep.body.interference[0].stackTrace[0];
+    stackTraceN = dep.body.interference[dep.body.interference.length - 1].stackTrace![0];
+  }
+
+  const file0 = stackTrace0.class.replaceAll(".", "/") + ".java";
   const fileN = stackTraceN.class.replaceAll(".", "/") + ".java";
 
-  dep.body.interference[0].location.file = file0;
-  dep.body.interference[0].location.line = stackTrace0.line;
-  dep.body.interference[0].location.class = stackTrace0.class;
-  dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
-  dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
-  dep.body.interference[dep.body.interference.length - 1].location.class = stackTraceN.class;
+  if (inplace) {
+    dep.body.interference[0].location.file = file0;
+    dep.body.interference[0].location.line = stackTrace0.line;
+    dep.body.interference[0].location.class = stackTrace0.class;
+    dep.body.interference[dep.body.interference.length - 1].location.file = fileN;
+    dep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
+    dep.body.interference[dep.body.interference.length - 1].location.class = stackTraceN.class;
 
-  return dep;
+    return dep;
+  } else {
+    const newDep = structuredClone(dep);
+
+    newDep.body.interference[0].location.file = file0;
+    newDep.body.interference[0].location.line = stackTrace0.line;
+    newDep.body.interference[0].location.class = stackTrace0.class;
+    newDep.body.interference[dep.body.interference.length - 1].location.file = fileN;
+    newDep.body.interference[dep.body.interference.length - 1].location.line = stackTraceN.line;
+    newDep.body.interference[dep.body.interference.length - 1].location.class = stackTraceN.class;
+
+    return newDep;
+  }
 };
 
 const getDiffLine = (file: string, line: number) => {
@@ -218,14 +277,15 @@ const getDiffLine = (file: string, line: number) => {
 };
 
 const gotoDiffConflict = (
-  file: string,
+  file1: string,
+  file2: string,
   l1: interferenceNode,
   l2: interferenceNode,
   modifiedLines: modLine[]
 ) => {
   // get the first and last lines of the conflict
-  const lineFrom = getDiffLine(file, l1.location.line);
-  const lineTo = getDiffLine(file, l2.location.line);
+  const lineFrom = getDiffLine(file1, l1.location.line);
+  const lineTo = getDiffLine(file2, l2.location.line);
 
   // get the source branch for each line
   const sourceBranchFrom = findSourceBranch(l1, modifiedLines);
