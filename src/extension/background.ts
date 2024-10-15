@@ -62,7 +62,7 @@ const GITHUB_DOMAIN = "github.com";
  * @param details the details of the navigation
  */
 const injector = (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
-  loadCSS(details.tabId, ["diff2html", "tailwind", "dependency-plugin"]);
+  loadCSS(details.tabId, ["diff2html", "tailwind", "dependency-plugin", "react-sigma-min"]);
   insertNavTab(details.tabId);
 };
 

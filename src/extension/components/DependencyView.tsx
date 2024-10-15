@@ -10,6 +10,7 @@ import {
 } from "../utils/diff-navigation";
 import Conflict from "./Conflict";
 import { insertButtons } from "./InsertButtons";
+import { DisplayGraph } from "./GraphVisualization";
 
 const analysisService = new AnalysisService();
 const linesToExpand = 3;
@@ -407,6 +408,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         ) : diff ? (
           <div id="no-dependencies">
             <p>Não foram encontradas dependências durante as análises.</p>
+          </div>
+        ) : null}
+
+        {diff ? ( 
+          <div id="graph-container" className="tw-w-full tw-mb-3">
+            <DisplayGraph />
           </div>
         ) : null}
 
