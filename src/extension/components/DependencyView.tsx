@@ -12,7 +12,6 @@ import Conflict from "./Conflict";
 import { insertButtons } from "./InsertButtons";
 
 const analysisService = new AnalysisService();
-const linesToExpand = 3;
 
 const diffConfig: Diff2HtmlConfig = {
   outputFormat: "line-by-line",
@@ -215,7 +214,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           }
         })
         
-        insertButtons(diffFile, expandTop, expandBottom);
+        const fileName = diffFile.querySelector(".d2h-file-name")?.textContent;
+        if (fileName){
+          insertButtons(diffFile, fileName);
+        }  
       })
     }
     updateDiffColors();
@@ -275,103 +277,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       }
     });
   }, [isCollapsed]);
-
-    //function to reveal lines to up
-   const expandTop = (diffFile: HTMLElement, lineIndex: number) => {
-    const lines = diffFile.querySelectorAll("tr");
-    const buttonContainer = lines[lineIndex].previousElementSibling as HTMLElement;
-    let lastLineBeforeButton = 0;
-    let limit = -1;
-    let linesExpandeds = lineIndex - (2 * linesToExpand);
-
-    lines.forEach((line, index) => {
-      if (!line.classList.contains('d2h-d-none') && index < lineIndex) {
-        lastLineBeforeButton = index;
-      }
-    });
-
-
-    if (linesExpandeds <= lastLineBeforeButton + 1){
-      limit = lastLineBeforeButton;
-      buttonContainer?.classList.add("d2h-d-none");
-      
-      //checking button-down to remove
-      if (lastLineBeforeButton != 0){
-        lines[limit].nextElementSibling?.classList.add("d2h-d-none");
-      }
-
-    }else{
-      limit = linesExpandeds;
-      
-      //Making a new button
-      buttonContainer?.remove(); 
-
-      const newTopButtonContainer = document.createElement("div");
-      newTopButtonContainer.classList.add("button-container", "button-top");
-      const newTopButton = document.createElement("button");
-      newTopButton.innerHTML = "&#x25B2;";
-      newTopButton.classList.add("button-style");
-
-      newTopButton.onclick = () => expandTop(diffFile, limit);
-      newTopButton.title = "Expand Up";
-
-      newTopButtonContainer.appendChild(newTopButton);
-
-      lines[limit].insertAdjacentElement("beforebegin", newTopButtonContainer);
-    }
-
-    for (let i = lineIndex - 1; i >= limit ; i--) {
-      lines[i].classList.remove("d2h-d-none");
-    }
-  };
-
-  //function to show lines to down
-  const expandBottom = (diffFile: HTMLElement, lineIndex: number) => {
-    const lines = diffFile.querySelectorAll("tr");
-    const buttonContainer = lines[lineIndex].nextElementSibling as HTMLElement;
-    let firstLineAfterButton = -1;
-    let limit = -1;
-    let linesExpandeds = lineIndex + (2 * linesToExpand);
-    
-    lines.forEach((line, index) => {
-      if (!line.classList.contains('d2h-d-none') && (index > lineIndex) && firstLineAfterButton == -1) {
-        firstLineAfterButton = index;
-      }
-    });
-     
-    if (firstLineAfterButton == -1 && linesExpandeds >= lines.length){
-      limit = lines.length;
-      buttonContainer?.remove();
-
-    }else if (firstLineAfterButton != -1 && (linesExpandeds >= firstLineAfterButton)){
-      limit = firstLineAfterButton;
-      buttonContainer?.remove();
-      lines[limit].previousElementSibling?.classList.add("d2h-d-none");
-    }else if ((firstLineAfterButton != -1 && linesExpandeds < firstLineAfterButton) || linesExpandeds < lines.length){
-      limit = linesExpandeds;
-
-      //Making a new button
-      buttonContainer?.remove(); 
-
-      const newBottomButtonContainer = document.createElement("div");
-      newBottomButtonContainer.classList.add("button-container", "button-down");
-      const newBottomButton = document.createElement("button");
-      newBottomButton.innerHTML = "&#x25BC;";
-      newBottomButton.classList.add("button-style");
-
-      newBottomButton.onclick = () => expandBottom(diffFile, limit);
-      newBottomButton.title = "Expand Down";
-
-      newBottomButtonContainer.appendChild(newBottomButton);
-
-      lines[limit].insertAdjacentElement("afterend", newBottomButtonContainer);
-    }
-
-    for (let i = lineIndex + 1; i < limit; i++) {
-      lines[i].classList.remove("d2h-d-none");
-    }
-  };
-
+   
   return (
     <div id="dependency-plugin">
       <div id="dependency-plugin-options" className="tw-mb-3 tw-flex tw-flex-row">
