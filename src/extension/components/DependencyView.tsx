@@ -459,15 +459,16 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         ) : null}
 
         {diff ? ( 
+          <div id="content-container" className="tw-w-full">
+            {graphData && (
           <div id="graph-container" className="tw-w-full tw-mb-3">
                 <DisplayGraph data={graphData} />
           </div>
-        ) : null}
-
-        {diff ? (
+            )}
           <div id="diff-container" className="tw-mb-3 tw-w-full">
             <h1>Diff</h1>
             {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
+            </div>
           </div>
         ) : (
           <div id="no-analysis" className="tw-mb-3">
