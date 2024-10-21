@@ -11,6 +11,7 @@ import {
 import Conflict from "./Conflict";
 import { insertButtons } from "./InsertButtons";
 import { DisplayGraph } from "./GraphVisualization";
+import { SerializedGraph } from "graphology-types";
 
 const analysisService = new AnalysisService();
 const linesToExpand = 3;
@@ -50,6 +51,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
    * The deep mode ensures that the last valid nodes in the stack trace are shown.
    */
   const [conflictViewMode, setConflictViewMode] = useState<"default" | "deep">("default"); // conflict view mode
+  const [graphData, setGraphData] = useState<Partial<SerializedGraph> | null>(null);
 
   const filterDuplicatedDependencies = (dependencies: dependency[]) => {
     const uniqueDependencies: dependency[] = [];
@@ -70,6 +72,47 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
 
     return uniqueDependencies;
+  };
+
+  const generateGraphData = (fileFrom: string, fileTo: string, lineFrom: number, lineTo: number) => {
+    const nodes = [
+      {
+        key: "0",
+        attributes: {
+          x: 0,
+          y: 0,
+          label: `${fileFrom}:${lineFrom}`,
+          size: 15,
+          color: "#FA4F40",
+          labelPosition: "top"
+        }
+      },
+      {
+        key: "1",
+        attributes: {
+          x: 1,
+          y: 0,
+          label: `${fileTo}:${lineTo}`,
+          size: 15,
+          color: "#FA4F40",
+          labelPosition: "right"
+        }
+      }
+    ];
+
+    const edges = [
+      {
+        source: "0",
+        target: "1",
+        attributes: {
+          color: "#000000",
+          size: 4,
+          type: "arrow"
+        }
+      }
+    ];
+
+    return { nodes, edges };
   };
 
   const changeActiveConflict = (dep: dependency) => {
@@ -97,6 +140,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/");
       fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/");
     }
+
+    // create the graph data
+    const newGraphData = generateGraphData(fileFrom, fileTo, lineFrom.location.line, lineTo.location.line);
+    setGraphData(newGraphData);
 
     // set the new conflict as active
     const newConflict = gotoDiffConflict(fileFrom, fileTo, lineFrom, lineTo, modifiedLines);
@@ -413,7 +460,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
         {diff ? ( 
           <div id="graph-container" className="tw-w-full tw-mb-3">
-            <DisplayGraph />
+                <DisplayGraph data={graphData} />
           </div>
         ) : null}
 
