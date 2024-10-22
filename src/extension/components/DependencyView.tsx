@@ -81,7 +81,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         attributes: {
           x: 0,
           y: 0,
-          label: `${fileFrom}:${lineFrom}`,
+          label: `${fileFrom.split("/").pop()}:${lineFrom}`,
           size: 15,
           color: "#FA4F40",
           labelPosition: "top"
@@ -92,7 +92,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         attributes: {
           x: 1,
           y: 0,
-          label: `${fileTo}:${lineTo}`,
+          label: `${fileTo.split("/").pop()}:${lineTo}`,
           size: 15,
           color: "#FA4F40",
           labelPosition: "right"
