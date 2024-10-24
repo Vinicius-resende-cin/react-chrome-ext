@@ -107,7 +107,7 @@ export const insertButtons = (diffFile: HTMLElement, fileName: string) => {
         if (firstVisibleIndex === -1) {
           firstVisibleIndex = index;
           
-          if (firstVisibleIndex > 0) {
+          if (firstVisibleIndex > 1) {
             // Insert "expand up" button before the first visible line
             const topButton = createButton('top', diffFile, index, fileName);
             insertButtonInCell(line, topButton, 'top', index, fileName);
@@ -141,7 +141,7 @@ export const insertButtons = (diffFile: HTMLElement, fileName: string) => {
     });
   
     // Insert "expand bottom" after the last visible line
-    if ((lastVisibleIndex !== -1) || (lastVisibleIndex != lines.length - 1)) {
+    if ((lastVisibleIndex !== -1) && (lastVisibleIndex != lines.length - 1)) {
       const bottomButton = createButton('down', diffFile, lastVisibleIndex, fileName);
       insertButtonInCell(lines[lastVisibleIndex], bottomButton, 'bottom', lastVisibleIndex, fileName)
     }
