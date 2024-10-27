@@ -3,16 +3,12 @@ import AnalysisService from "../../services/AnalysisService";
 import { dependency, modLine } from "../../models/AnalysisOutput";
 import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
-import {
-  gotoDiffConflict,
-  unsetAsConflictLine,
-  updateLocationFromStackTrace
-} from "../utils/diff-navigation";
+import { gotoDiffConflict, unsetAsConflictLine, updateLocationFromStackTrace } from "../utils/diff-navigation";
 import Conflict from "./Conflict";
 import { insertButtons } from "./InsertButtons";
 import { DisplayGraph } from "./GraphVisualization";
 import { SerializedGraph } from "graphology-types";
-import { generateGraphData } from "../utils/graph";
+import { generateGraphData, lineData } from "../utils/graph";
 
 const analysisService = new AnalysisService();
 
@@ -45,12 +41,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [activeConflict, setActiveConflict] = useState<number | null>(null); // index of the active conflict on dependencies list
   const [activeConflictLines, setActiveConflictLines] = useState<HTMLElement[]>([]); // lines of the active conflict
   const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
-  /*
-   * conflictViewMode: This state is used to control the view mode of the conflicts.
-   * The default mode shows the conflicts with the first valid nodes from the analysis.
-   * The deep mode ensures that the last valid nodes in the stack trace are shown.
-   */
-  const [conflictViewMode, setConflictViewMode] = useState<"default" | "deep">("default"); // conflict view mode
   const [graphData, setGraphData] = useState<Partial<SerializedGraph> | null>(null);
 
   const filterDuplicatedDependencies = (dependencies: dependency[]) => {
@@ -74,17 +64,37 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     return uniqueDependencies;
   };
 
+  const updateGraph = (dep: dependency, L: lineData, R: lineData) => {
+    let newGraphData;
+
+    // if the conflict is OA, get the LC and RC
+    if (dep.type.startsWith("OA")) {
+      // get the LC and RC
+      dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
+
+      // get the filename and line numbers of the conflict
+      let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
+      let lineFrom = dep.body.interference[0]; // first line
+      let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
+      let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+
+      const LC = { file: fileFrom, line: lineFrom.location.line };
+      const RC = { file: fileTo, line: lineTo.location.line };
+
+      newGraphData = generateGraphData("oa", { L, R, LC, RC });
+    }
+
+    // set the new graph data
+    if (!newGraphData) setGraphData(null);
+    else setGraphData(newGraphData);
+  };
+
   const changeActiveConflict = (dep: dependency) => {
     // remove the styles from the previous conflict
     if (activeConflictLines.length) {
       activeConflictLines.forEach((line) => {
         unsetAsConflictLine(line, modifiedLines);
       });
-    }
-
-    // update the location if the deep mode is active
-    if (conflictViewMode === "deep") {
-      dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
     }
 
     // get the filename and line numbers of the conflict
@@ -100,17 +110,14 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/");
     }
 
-    // create the graph data
-    const newGraphData = generateGraphData(fileFrom, fileTo, lineFrom.location.line, lineTo.location.line);
-    setGraphData(newGraphData);
+    // declare the graph data variables
+    let L: lineData = { file: fileFrom, line: lineFrom.location.line };
+    let R: lineData = { file: fileTo, line: lineTo.location.line };
+    updateGraph(dep, L, R);
 
     // set the new conflict as active
     const newConflict = gotoDiffConflict(fileFrom, fileTo, lineFrom, lineTo, modifiedLines);
     setActiveConflictLines(newConflict);
-  };
-
-  const handleChangeConflictViewMode = (toDeepMode: boolean) => {
-    setConflictViewMode(toDeepMode ? "deep" : "default");
   };
 
   // get the analysis output
@@ -151,7 +158,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       const conflict = dependencies[activeConflict];
       changeActiveConflict(conflict);
     }
-  }, [activeConflict, conflictViewMode]);
+  }, [activeConflict]);
 
   // update the colors of the diff
   useEffect(() => {
@@ -212,22 +219,22 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
         //Checking the changed lines
         lines.forEach((line, index) => {
-          if (line.querySelector('.d2h-ins') || line.querySelector('.d2h-del')) {
+          if (line.querySelector(".d2h-ins") || line.querySelector(".d2h-del")) {
             for (let i = Math.max(0, index - 3); i <= Math.min(lines.length - 1, index + 3); i++) {
               lines[i].classList.remove("d2h-d-none");
               linesAlreadyShown.add(i);
             }
-          }else if (!linesAlreadyShown.has(index)) {
+          } else if (!linesAlreadyShown.has(index)) {
             line.classList.add("d2h-d-none");
           }
-        })
-        
+        });
+
         const fileName = diffFile.querySelector(".d2h-file-name")?.textContent;
-        if (fileName){
+        if (fileName) {
           insertButtons(diffFile, fileName);
-        }  
-      })
-    }
+        }
+      });
+    };
     updateDiffColors();
     collapsedViewed();
   }, [modifiedLines]);
@@ -285,20 +292,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       }
     });
   }, [isCollapsed]);
-   
+
   return (
     <div id="dependency-plugin">
-      <div id="dependency-plugin-options" className="tw-mb-3 tw-flex tw-flex-row">
-        <input
-          type="checkbox"
-          name="conflict-view-mode-checkbox"
-          id="conflict-view-mode"
-          onChange={(e) => handleChangeConflictViewMode(e.target.checked)}
-        />
-        <label htmlFor="conflict-view-mode" className="tw-ml-3">
-          Deep mode
-        </label>
-      </div>
       <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
         {dependencies.length ? (
           <div
@@ -324,16 +320,16 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           </div>
         ) : null}
 
-        {diff ? ( 
+        {diff ? (
           <div id="content-container" className="tw-w-full">
             {graphData && (
-          <div id="graph-container" className="tw-w-full tw-mb-3">
+              <div id="graph-container" className="tw-w-full tw-mb-3">
                 <DisplayGraph data={graphData} />
-          </div>
+              </div>
             )}
-          <div id="diff-container" className="tw-mb-3 tw-w-full">
-            <h1>Diff</h1>
-            {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
+            <div id="diff-container" className="tw-mb-3 tw-w-full">
+              <h1>Diff</h1>
+              {createElement("div", { dangerouslySetInnerHTML: { __html: diffHtml(diff, diffConfig) } })}
             </div>
           </div>
         ) : (
