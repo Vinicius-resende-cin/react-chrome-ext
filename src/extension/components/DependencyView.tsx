@@ -12,6 +12,7 @@ import Conflict from "./Conflict";
 import { insertButtons } from "./InsertButtons";
 import { DisplayGraph } from "./GraphVisualization";
 import { SerializedGraph } from "graphology-types";
+import { generateGraphData } from "../utils/graph";
 
 const analysisService = new AnalysisService();
 const linesToExpand = 3;
@@ -72,47 +73,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     });
 
     return uniqueDependencies;
-  };
-
-  const generateGraphData = (fileFrom: string, fileTo: string, lineFrom: number, lineTo: number) => {
-    const nodes = [
-      {
-        key: "0",
-        attributes: {
-          x: 0,
-          y: 0,
-          label: `${fileFrom.split("/").pop()}:${lineFrom}`,
-          size: 15,
-          color: "#FA4F40",
-          labelPosition: "top"
-        }
-      },
-      {
-        key: "1",
-        attributes: {
-          x: 1,
-          y: 0,
-          label: `${fileTo.split("/").pop()}:${lineTo}`,
-          size: 15,
-          color: "#FA4F40",
-          labelPosition: "right"
-        }
-      }
-    ];
-
-    const edges = [
-      {
-        source: "0",
-        target: "1",
-        attributes: {
-          color: "#000000",
-          size: 4,
-          type: "arrow"
-        }
-      }
-    ];
-
-    return { nodes, edges };
   };
 
   const changeActiveConflict = (dep: dependency) => {
