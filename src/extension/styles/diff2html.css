@@ -65,26 +65,29 @@
 }
 .button-container {
   background-color: #f1f8ff;
-  display: flex; 
-  justify-content: flex-start; 
-  height: 25px;
+  display: table-row; 
+  box-sizing: border-box;
+  vertical-align: inherit;
+  unicode-bidi: isolate;
+  border-color: inherit;
 }
 .button-style {
   background-color: #A4C8FF; 
+  width: 7.5em;
+  box-sizing: border-box;
   border: none; 
   color: #7A7C80;
-  padding: 5px 10px;
-  width: 98px;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2 ease;
 }
-
 .button-style:hover {
   background-color: #0366d6; 
+  color: #FFFFFF;
+}
+.button-cell {
+  display: table-cell;
+  padding: 0;
+  vertical-align: inherit;
+  unicode-bidi: isolate;
 }
 .d2h-wrapper {
   text-align: left;
