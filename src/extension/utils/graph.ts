@@ -98,7 +98,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         color: EDGE_COLOR,
         size: EDGE_SIZE,
         type: "arrow",
-        label: "precedes"
+        label: "OA"
       }
     },
     {
@@ -108,7 +108,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         color: EDGE_COLOR,
         size: EDGE_SIZE,
         type: "arrow",
-        label: "call"
+        label: "Call"
       }
     },
     {
@@ -118,7 +118,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         color: EDGE_COLOR,
         size: EDGE_SIZE,
         type: "arrow",
-        label: "call"
+        label: "Call"
       }
     },
     {

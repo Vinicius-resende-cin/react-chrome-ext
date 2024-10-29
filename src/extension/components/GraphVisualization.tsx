@@ -141,8 +141,13 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
   useEffect(() => {
     setSettings({
       renderLabels: true,
+      renderEdgeLabels: true,
       defaultDrawNodeLabel: drawLabel,
-      defaultDrawNodeHover: drawHover
+      defaultDrawNodeHover: drawHover,
+      edgeLabelSize: 12, 
+      edgeLabelFont: 'Arial',
+      edgeLabelWeight: 'bold',
+      edgeLabelColor: { color: "#000" },
     });
   }, [setSettings]);
 
