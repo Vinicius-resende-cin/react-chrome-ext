@@ -33,10 +33,17 @@ function drawLabel(
       data.x,
       data.y - data.size - LABEL_Y_OFFSET - HOVER_PADDING // Adjust the offset to position label above the node
     );
-  } else {
-    // default to right
+  } else if (data.labelPosition == "right") {
     context.textAlign = "left"; // Left align the text
     context.fillText(data.label, data.x + data.size + 3, data.y + size / 3);
+  } else {
+    //default to bottom
+    context.textAlign = "center"; // Center align the text
+    context.fillText(
+      data.label,
+      data.x,
+      data.y + data.size + (3.5 * LABEL_Y_OFFSET) + HOVER_PADDING// Adjust the offset to position label above the node
+    );
   }
 }
 
@@ -83,6 +90,28 @@ const drawLabelRectRight = (
   context.fill();
 };
 
+// draw the label background on the bottom of the node
+const drawLabelRectBottom = (
+  context: CanvasRenderingContext2D,
+  data: PartialButFor<NodeDisplayData, "x" | "y" | "size" | "label" | "color">,
+  boxWidth: number,
+  boxHeight: number,
+  labelOffsetY: number,
+  arcRadius: number
+) => {
+
+  // Draw the rounded rectangle on the bottom of the node
+  context.beginPath();
+  context.moveTo(data.x - boxWidth / 2, data.y + labelOffsetY); // Bottom-left corner
+  context.lineTo(data.x + boxWidth / 2, data.y + labelOffsetY); // Bottom-right corner
+  context.lineTo(data.x + boxWidth / 2, data.y + labelOffsetY - boxHeight); // Top-right corner
+  context.lineTo(data.x, data.y + labelOffsetY - boxHeight); // Middle-bottom
+  context.arc(data.x, data.y, arcRadius, Math.PI / 2, -1.5 * Math.PI); // Arc around the node
+  context.lineTo(data.x - boxWidth / 2, data.y + labelOffsetY - boxHeight); // Top-left corner
+  context.closePath();
+  context.fill();
+};
+
 // Custom node label renderer for hover
 function drawHover(
   context: CanvasRenderingContext2D,
@@ -112,10 +141,13 @@ function drawHover(
       // Offset to place the label background above the node
       const labelOffsetY = data.size + boxHeight + HOVER_PADDING;
       drawLabelRectTop(context, data, boxWidth, boxHeight, labelOffsetY, radius);
-    } else {
-      // default to right
+    } else if (data.labelPosition == "right") {
       const labelOffsetX = Math.sqrt(Math.abs(Math.pow(radius, 2) - Math.pow(boxHeight / 2, 2)));
       drawLabelRectRight(context, data, boxWidth, boxHeight, labelOffsetX, radius);
+    } else {
+      //default to bottom
+      const labelOffsetY = data.size + boxHeight + HOVER_PADDING;
+      drawLabelRectBottom(context, data, boxWidth, boxHeight, labelOffsetY, radius);
     }
   } else {
     // Draw a circle around the node
