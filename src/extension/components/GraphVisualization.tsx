@@ -42,7 +42,7 @@ function drawLabel(
     context.fillText(
       data.label,
       data.x,
-      data.y + data.size + (3 * LABEL_Y_OFFSET) + HOVER_PADDING// Adjust the offset to position label above the node
+      data.y + data.size + (3.5 * LABEL_Y_OFFSET) + HOVER_PADDING// Adjust the offset to position label above the node
     );
   }
 }
@@ -99,7 +99,6 @@ const drawLabelRectBottom = (
   labelOffsetY: number,
   arcRadius: number
 ) => {
-  const angleRadian = Math.asin(boxHeight / 2 / arcRadius);
 
   // Draw the rounded rectangle on the bottom of the node
   context.beginPath();
