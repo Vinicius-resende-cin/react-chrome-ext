@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import Graph from "graphology";
-import { SigmaContainer, useLoadGraph, useSetSettings } from "@react-sigma/core";
+import { SigmaContainer, useLoadGraph, useRegisterEvents, useSetSettings, useSigma } from "@react-sigma/core";
 import { SerializedGraph } from "graphology-types";
 import { NodeDisplayData, PartialButFor } from "sigma/types";
 import { Settings } from "sigma/settings";
+import { getDiffLine, scrollAndHighlight } from "../utils/diff-navigation";
 
 const LABEL_Y_OFFSET = 4;
 const HOVER_PADDING = 2;
@@ -42,7 +43,7 @@ function drawLabel(
     context.fillText(
       data.label,
       data.x,
-      data.y + data.size + (3.5 * LABEL_Y_OFFSET) + HOVER_PADDING// Adjust the offset to position label above the node
+      data.y + data.size + 3.5 * LABEL_Y_OFFSET + HOVER_PADDING // Adjust the offset to position label above the node
     );
   }
 }
@@ -99,7 +100,6 @@ const drawLabelRectBottom = (
   labelOffsetY: number,
   arcRadius: number
 ) => {
-
   // Draw the rounded rectangle on the bottom of the node
   context.beginPath();
   context.moveTo(data.x - boxWidth / 2, data.y + labelOffsetY); // Bottom-left corner
@@ -165,10 +165,27 @@ function drawHover(
   drawLabel(context, data, settings);
 }
 
+// Node navigation to diff line
+const navigateToDiffLine = (node: NodeDisplayData) => {
+  if (!node || !node.label) return;
+
+  const [file, line] = node.label.split(":");
+  const diffLine = getDiffLine(file, Number(line));
+  scrollAndHighlight(diffLine);
+};
+
 // Component that load the graph
 const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
+  const sigma = useSigma();
   const loadGraph = useLoadGraph();
   const setSettings = useSetSettings();
+  const registerEvents = useRegisterEvents();
+
+  useEffect(() => {
+    registerEvents({
+      clickNode: (event) => navigateToDiffLine(sigma.getNodeDisplayData(event.node) as NodeDisplayData)
+    });
+  });
 
   useEffect(() => {
     setSettings({
@@ -176,10 +193,10 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
       renderEdgeLabels: true,
       defaultDrawNodeLabel: drawLabel,
       defaultDrawNodeHover: drawHover,
-      edgeLabelSize: 12, 
-      edgeLabelFont: 'Arial',
-      edgeLabelWeight: 'bold',
-      edgeLabelColor: { color: "#000" },
+      edgeLabelSize: 12,
+      edgeLabelFont: "Arial",
+      edgeLabelWeight: "bold",
+      edgeLabelColor: { color: "#000" }
     });
   }, [setSettings]);
 
