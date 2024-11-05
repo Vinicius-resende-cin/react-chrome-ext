@@ -1,6 +1,13 @@
 import { useEffect } from "react";
 import Graph from "graphology";
-import { SigmaContainer, useLoadGraph, useRegisterEvents, useSetSettings, useSigma } from "@react-sigma/core";
+import {
+  SigmaContainer,
+  useCamera,
+  useLoadGraph,
+  useRegisterEvents,
+  useSetSettings,
+  useSigma
+} from "@react-sigma/core";
 import { SerializedGraph } from "graphology-types";
 import { NodeDisplayData, PartialButFor } from "sigma/types";
 import { Settings } from "sigma/settings";
@@ -177,6 +184,7 @@ const navigateToDiffLine = (node: NodeDisplayData) => {
 // Component that load the graph
 const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
   const sigma = useSigma();
+  const { zoomIn, zoomOut } = useCamera();
   const loadGraph = useLoadGraph();
   const setSettings = useSetSettings();
   const registerEvents = useRegisterEvents();
@@ -204,7 +212,8 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
     const graph = new Graph();
     graph.import(data);
     loadGraph(graph);
-  }, [data, loadGraph]);
+    zoomOut({ factor: 1.2 });
+  }, [data, loadGraph, zoomOut]);
 
   return null;
 };
