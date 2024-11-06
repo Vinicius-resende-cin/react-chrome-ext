@@ -1,7 +1,9 @@
 const NODE_SIZE = 15;
 const NODE_COLOR = "#FA4F40";
 const EDGE_SIZE = 4;
-const EDGE_COLOR = "#000000";
+const EDGE_COLOR_CALL = "#000000";
+const EDGE_COLOR_PRECEDES ="#FACC4F";
+const EDGE_COLOR_OA ="#4F80FA";
 
 type lineData = {
   file: string;
@@ -95,17 +97,17 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
       source: "0",
       target: "1",
       attributes: {
-        color: EDGE_COLOR,
+        color: EDGE_COLOR_PRECEDES,
         size: EDGE_SIZE,
         type: "arrow",
-        label: "OA"
+        label: "Precedes"
       }
     },
     {
       source: "0",
       target: "2",
       attributes: {
-        color: EDGE_COLOR,
+        color: EDGE_COLOR_CALL,
         size: EDGE_SIZE,
         type: "arrow",
         label: "Call"
@@ -115,7 +117,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
       source: "1",
       target: "3",
       attributes: {
-        color: EDGE_COLOR,
+        color: EDGE_COLOR_CALL,
         size: EDGE_SIZE,
         type: "arrow",
         label: "Call"
@@ -125,7 +127,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
       source: "2",
       target: "3",
       attributes: {
-        color: EDGE_COLOR,
+        color: EDGE_COLOR_OA,
         size: EDGE_SIZE,
         type: "arrow",
         label: "OA"
