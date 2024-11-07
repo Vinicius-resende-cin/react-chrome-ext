@@ -23,7 +23,14 @@ const generateGraphData = (conflictType: string, data: OAlineData | { [key: stri
     const R = data["R"];
     const LC = data["LC"];
     const RC = data["RC"];
-    return generateOAGraphData(L, R, LC, RC);
+
+    if (`${L.file.split("/").pop()}:${L.line}` === `${LC.file.split("/").pop()}:${LC.line}`){
+      if (`${R.file.split("/").pop()}:${R.line}` === `${RC.file.split("/").pop()}:${RC.line}`){
+        return generateOAGraphDataTwoNodes(L, R);
+      }
+    }else{
+      return generateOAGraphDataFourNodes(L, R, LC, RC);
+    }
   } else {
     throw new Error("Conflict type not supported");
   }
@@ -44,7 +51,7 @@ const generateGraphData = (conflictType: string, data: OAlineData | { [key: stri
  * @param RC - line that derives from the line modified by the right side and directly involved in the conflict
  * @returns an object with the nodes and edges for the graph that represents the OA conflict format
  */
-const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineData) => {
+const generateOAGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData) => {
   const nodes = [
     {
       key: "0",
@@ -137,5 +144,48 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
 
   return { nodes, edges };
 };
+
+const generateOAGraphDataTwoNodes = (L: lineData, R: lineData) => {
+  const nodes = [
+    {
+      key: "0",
+      attributes: {
+        x: 0,
+        y: 0,
+        label: `${L.file.split("/").pop()}:${L.line}`,
+        size: NODE_SIZE,
+        color: NODE_COLOR,
+        labelPosition: "top"
+      }
+    },
+    {
+      key: "1",
+      attributes: {
+        x: 1,
+        y: 0,
+        label: `${R.file.split("/").pop()}:${R.line}`,
+        size: NODE_SIZE,
+        color: NODE_COLOR,
+        labelPosition: "right"
+      }
+    }
+  ];
+
+  const edges = [
+    {
+      source: "0",
+      target: "1",
+      attributes: {
+        color: EDGE_COLOR_OA,
+        size: EDGE_SIZE,
+        type: "arrow",
+        label: "OA"
+      }
+    }
+  ];
+
+  return { nodes, edges };
+};
+
 
 export { generateGraphData, type lineData };
