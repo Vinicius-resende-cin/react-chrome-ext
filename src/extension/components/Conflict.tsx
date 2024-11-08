@@ -1,5 +1,5 @@
 import { dependency } from "../../models/AnalysisOutput";
-import { updateLocationFromStackTrace } from "../utils/diff-navigation";
+import { updateLocationFromStackTrace } from "./dependencies";
 
 interface ConflictProps {
   index: number;

@@ -11,7 +11,7 @@ import {
 import { SerializedGraph } from "graphology-types";
 import { NodeDisplayData, PartialButFor } from "sigma/types";
 import { Settings } from "sigma/settings";
-import { getDiffLine, scrollAndHighlight } from "../utils/diff-navigation";
+import { getDiffLine, scrollAndHighlight } from "../Diff/diff-navigation";
 
 const LABEL_Y_OFFSET = 4;
 const HOVER_PADDING = 2;
@@ -218,11 +218,15 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
   return null;
 };
 
+interface GraphViewProps {
+  data: Partial<SerializedGraph>;
+}
+
 // Component that display the graph
-export const DisplayGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
+export default function GraphView({ data }: GraphViewProps) {
   return (
     <SigmaContainer style={sigmaStyle}>
       <LoadGraph data={data} />
     </SigmaContainer>
   );
-};
+}
