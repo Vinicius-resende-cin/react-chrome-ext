@@ -1,4 +1,4 @@
-import { interferenceNode, modLine, tracedNode } from "../../../models/AnalysisOutput";
+import { interferenceNode, modLine } from "../../../models/AnalysisOutput";
 
 const fadeOutBorder = (diffLine: HTMLElement) => {
   diffLine.classList.add("pl-fadeout-border");

@@ -7,7 +7,6 @@ import DiffView from "./Diff/DiffView";
 import GraphView from "./Graph/GraphView";
 import { SerializedGraph } from "graphology-types";
 import { generateGraphData, lineData } from "./Graph/graph";
-import { unsetAsConflictLine, gotoDiffConflict } from "./Diff/diff-navigation";
 
 const analysisService = new AnalysisService();
 
@@ -34,7 +33,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
    * page properties
    */
   const [activeConflict, setActiveConflict] = useState<number | null>(null); // index of the active conflict on dependencies list
-  const [activeConflictLines, setActiveConflictLines] = useState<HTMLElement[]>([]); // lines of the active conflict
 
   /*
    * methods
@@ -65,13 +63,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   };
 
   const changeActiveConflict = (dep: dependency) => {
-    // remove the styles from the previous conflict
-    if (activeConflictLines.length) {
-      activeConflictLines.forEach((line) => {
-        unsetAsConflictLine(line, modifiedLines);
-      });
-    }
-
     // get the filename and line numbers of the conflict
     let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
     let lineFrom = dep.body.interference[0]; // first line
@@ -89,10 +80,6 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let L: lineData = { file: fileFrom, line: lineFrom.location.line };
     let R: lineData = { file: fileTo, line: lineTo.location.line };
     updateGraph(dep, L, R);
-
-    // set the new conflict as active
-    const newConflict = gotoDiffConflict(fileFrom, fileTo, lineFrom, lineTo, modifiedLines);
-    setActiveConflictLines(newConflict);
   };
 
   // get the analysis output
