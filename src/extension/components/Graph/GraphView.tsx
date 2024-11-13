@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Graph from "graphology";
 import {
   SigmaContainer,
-  useCamera,
+  ControlsContainer,
+  ZoomControl,
   useLoadGraph,
   useRegisterEvents,
   useSetSettings,
@@ -11,10 +12,12 @@ import {
 import { SerializedGraph } from "graphology-types";
 import { NodeDisplayData, PartialButFor } from "sigma/types";
 import { Settings } from "sigma/settings";
-import { getDiffLine, scrollAndHighlight } from "../utils/diff-navigation";
+import { AnimateOptions } from "sigma/utils";
+import { getDiffLine, scrollAndHighlight } from "../Diff/diff-navigation";
 
 const LABEL_Y_OFFSET = 4;
 const HOVER_PADDING = 2;
+const CAMERA_DEFAULT_ZOOMING_RATIO = 1.2;
 
 const sigmaStyle = { height: "500px", width: "100%" };
 
@@ -184,10 +187,25 @@ const navigateToDiffLine = (node: NodeDisplayData) => {
 // Component that load the graph
 const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
   const sigma = useSigma();
-  const { zoomIn, zoomOut } = useCamera();
   const loadGraph = useLoadGraph();
   const setSettings = useSetSettings();
   const registerEvents = useRegisterEvents();
+
+  // custom reset zoom method
+  const resetCamera = useCallback(
+    (options?: Partial<AnimateOptions>) => {
+      sigma.getCamera().animate(
+        {
+          x: 0.5,
+          y: 0.5,
+          ratio: CAMERA_DEFAULT_ZOOMING_RATIO,
+          angle: 0
+        },
+        options
+      );
+    },
+    [sigma]
+  );
 
   useEffect(() => {
     registerEvents({
@@ -212,17 +230,28 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
     const graph = new Graph();
     graph.import(data);
     loadGraph(graph);
-    zoomOut({ factor: 1.2 });
-  }, [data, loadGraph, zoomOut]);
+    resetCamera();
+  }, [data, loadGraph, resetCamera]);
 
   return null;
 };
 
+interface GraphViewProps {
+  data: Partial<SerializedGraph>;
+}
+
+const zoomControlStyle: React.CSSProperties = {
+  colorScheme: "light"
+};
+
 // Component that display the graph
-export const DisplayGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
+export default function GraphView({ data }: GraphViewProps) {
   return (
     <SigmaContainer style={sigmaStyle}>
       <LoadGraph data={data} />
+      <ControlsContainer>
+        <ZoomControl style={zoomControlStyle} />
+      </ControlsContainer>
     </SigmaContainer>
   );
-};
+}
