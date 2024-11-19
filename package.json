@@ -22,7 +22,7 @@
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "watch": "webpack -w --config webpack.config.js",
-    "start": "jest ."
+    "test": "jest ."
   },
   "eslintConfig": {
     "extends": [

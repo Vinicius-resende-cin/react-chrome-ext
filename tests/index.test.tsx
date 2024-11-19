@@ -33,9 +33,9 @@ test('checking dependendies tag', async () => {
   const element = await page.waitForSelector('a.tabnav-tab.flex-shrink-0[href="#dependencies"]', { timeout: 20000 });
 
   if (element){
-    console.log('Log Founded!');
+    console.log('Tag Founded!');
   } else {
-    console.error('Log was not founded.');
+    console.error('Tag was not founded.');
   }
     
 }, 30000);
