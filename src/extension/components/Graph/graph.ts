@@ -1,9 +1,11 @@
+import { getClassFromJavaFilename } from "@extension/utils";
+
 const NODE_SIZE = 15;
 const NODE_COLOR = "#FA4F40";
 const EDGE_SIZE = 4;
 const EDGE_COLOR_CALL = "#000000";
-const EDGE_COLOR_PRECEDES ="#FACC4F";
-const EDGE_COLOR_OA ="#4F80FA";
+const EDGE_COLOR_PRECEDES = "#FACC4F";
+const EDGE_COLOR_OA = "#4F80FA";
 
 type lineData = {
   file: string;
@@ -46,18 +48,18 @@ const generateGraphData = (conflictType: string, data: OAlineData | { [key: stri
  * @returns an object with the nodes and edges for the graph that represents the OA conflict format
  */
 const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineData) => {
-  if (`${L.file.split("/").pop()}:${L.line}` === `${LC.file.split("/").pop()}:${LC.line}`) {
-      if (`${R.file.split("/").pop()}:${R.line}` === `${RC.file.split("/").pop()}:${RC.line}`){
-        return oaGraphDataTwoNodes(L, R);
-      } else {
-        return oaGraphDataThreeNodesRC(L, R, RC);
-      }
-  } else if (`${R.file.split("/").pop()}:${R.line}` === `${RC.file.split("/").pop()}:${RC.line}`) {
+  if (`${getClassFromJavaFilename(L.file)}:${L.line}` === `${getClassFromJavaFilename(LC.file)}:${LC.line}`) {
+    if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
+      return oaGraphDataTwoNodes(L, R);
+    } else {
+      return oaGraphDataThreeNodesRC(L, R, RC);
+    }
+  } else if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
     return oaGraphDataThreeNodesLC(L, R, LC);
   } else {
     return oaGraphDataFourNodes(L, R, LC, RC);
   }
-}
+};
 
 const oaGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData) => {
   const nodes = [
@@ -66,7 +68,7 @@ const oaGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
       attributes: {
         x: 0,
         y: 0,
-        label: `${L.file.split("/").pop()}:${L.line}`,
+        label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
         labelPosition: "top"
@@ -75,23 +77,23 @@ const oaGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
     {
       key: "1",
       attributes: {
-        x: 1,
-        y: 0,
-        label: `${R.file.split("/").pop()}:${R.line}`,
+        x: 0,
+        y: -1,
+        label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
-        labelPosition: "right"
+        labelPosition: "bottom"
       }
     },
     {
       key: "2",
       attributes: {
-        x: 0,
-        y: -1,
-        label: `${LC.file.split("/").pop()}:${LC.line}`,
+        x: 1,
+        y: 0,
+        label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
-        labelPosition: "bottom"
+        labelPosition: "right"
       }
     },
     {
@@ -99,7 +101,7 @@ const oaGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
       attributes: {
         x: 1,
         y: -1,
-        label: `${RC.file.split("/").pop()}:${RC.line}`,
+        label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
         labelPosition: "right"
@@ -160,7 +162,7 @@ const oaGraphDataTwoNodes = (L: lineData, R: lineData) => {
       attributes: {
         x: 0,
         y: 0,
-        label: `${L.file.split("/").pop()}:${L.line}`,
+        label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
         labelPosition: "top"
@@ -171,7 +173,7 @@ const oaGraphDataTwoNodes = (L: lineData, R: lineData) => {
       attributes: {
         x: 1,
         y: 0,
-        label: `${R.file.split("/").pop()}:${R.line}`,
+        label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
         labelPosition: "right"
@@ -202,7 +204,7 @@ const oaGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData) => {
       attributes: {
         x: 0,
         y: 0,
-        label: `${L.file.split("/").pop()}:${L.line}`,
+        label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
         labelPosition: "top"
@@ -211,12 +213,12 @@ const oaGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData) => {
     {
       key: "1",
       attributes: {
-        x: 1,
-        y: 0,
-        label: `${R.file.split("/").pop()}:${R.line}`,
+        x: 0,
+        y: -1,
+        label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
-        labelPosition: "right"
+        labelPosition: "bottom"
       }
     },
     {
@@ -224,7 +226,7 @@ const oaGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData) => {
       attributes: {
         x: 1,
         y: -1,
-        label: `${RC.file.split("/").pop()}:${RC.line}`,
+        label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
         labelPosition: "right"
@@ -262,7 +264,7 @@ const oaGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData) => {
         type: "arrow",
         label: "Call"
       }
-    },
+    }
   ];
 
   return { nodes, edges };
@@ -275,7 +277,7 @@ const oaGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData) => {
       attributes: {
         x: 0,
         y: 0,
-        label: `${L.file.split("/").pop()}:${L.line}`,
+        label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
         labelPosition: "top"
@@ -284,23 +286,23 @@ const oaGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData) => {
     {
       key: "1",
       attributes: {
-        x: 1,
-        y: 0,
-        label: `${R.file.split("/").pop()}:${R.line}`,
+        x: 0,
+        y: -1,
+        label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
-        labelPosition: "right"
+        labelPosition: "bottom"
       }
     },
     {
       key: "2",
       attributes: {
-        x: 0,
-        y: -1,
-        label: `${LC.file.split("/").pop()}:${LC.line}`,
+        x: 1,
+        y: 0,
+        label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
         size: NODE_SIZE,
         color: NODE_COLOR,
-        labelPosition: "bottom"
+        labelPosition: "right"
       }
     }
   ];
@@ -335,7 +337,7 @@ const oaGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData) => {
         type: "arrow",
         label: "OA"
       }
-    },
+    }
   ];
 
   return { nodes, edges };
