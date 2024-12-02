@@ -7,6 +7,8 @@ import DiffView from "./Diff/DiffView";
 import GraphView from "./Graph/GraphView";
 import { SerializedGraph } from "graphology-types";
 import { generateGraphData, lineData } from "./Graph/graph";
+import "../styles/dependency-plugin.css";
+import SettingsButton from "./Settings-button";
 
 const analysisService = new AnalysisService();
 
@@ -124,6 +126,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   return (
     <div id="dependency-plugin">
+      {diff ? (
+        <SettingsButton/>
+      ): null}
       <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
         {dependencies.length ? (
           <div
