@@ -8,7 +8,7 @@ import GraphView from "./Graph/GraphView";
 import { SerializedGraph } from "graphology-types";
 import { generateGraphData, lineData } from "./Graph/graph";
 import "../styles/dependency-plugin.css";
-import SettingsButton from "./Settings-button";
+import SettingsButton from "./Settings/Settings-button";
 
 const analysisService = new AnalysisService();
 
@@ -20,6 +20,15 @@ interface DependencyViewProps {
   owner: string;
   repository: string;
   pull_number: number;
+}
+
+let dependencyViewConfig: { owner: string; repository: string; pull_number: number } | null = null;
+
+export function getDependencyViewConfig() {
+  if (!dependencyViewConfig) {
+    throw new Error("DependencyViewConfig is not set. Ensure DependencyView is rendered.");
+  }
+  return dependencyViewConfig;
 }
 
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
@@ -87,6 +96,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   // get the analysis output
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
+      dependencyViewConfig = { owner, repository, pull_number };
       let dependencies = response.getDependencies();
       dependencies.forEach((dep) => {
         if (
