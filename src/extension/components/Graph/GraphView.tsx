@@ -180,7 +180,7 @@ const navigateToDiffLine = (node: NodeDisplayData) => {
   if (!node || !node.label) return;
 
   const [file, line] = node.label.split(":");
-  const diffLine = getDiffLine(file, Number(line));
+  const diffLine = getDiffLine(file.endsWith(".java") ? file : `${file}.java`, Number(line));
   scrollAndHighlight(diffLine);
 };
 
