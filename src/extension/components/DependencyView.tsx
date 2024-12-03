@@ -7,6 +7,8 @@ import DiffView from "./Diff/DiffView";
 import GraphView from "./Graph/GraphView";
 import { SerializedGraph } from "graphology-types";
 import { generateGraphData, lineData } from "./Graph/graph";
+import "../styles/dependency-plugin.css";
+import SettingsButton from "./Settings/Settings-button";
 
 const analysisService = new AnalysisService();
 
@@ -20,6 +22,15 @@ interface DependencyViewProps {
   pull_number: number;
 }
 
+let dependencyViewConfig: { owner: string; repository: string; pull_number: number } | null = null;
+
+export function getDependencyViewConfig() {
+  if (!dependencyViewConfig) {
+    throw new Error("DependencyViewConfig is not set. Ensure DependencyView is rendered.");
+  }
+  return dependencyViewConfig;
+}
+
 export default function DependencyView({ owner, repository, pull_number }: DependencyViewProps) {
   /*
    * analysis properties
@@ -28,6 +39,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [diff, setDiff] = useState<string>("");
   const [graphData, setGraphData] = useState<Partial<SerializedGraph> | null>(null);
+  const [baseClass, setBaseClass] = useState("");
+  const [mainMethod, setMainMethod] = useState("");
 
   /*
    * page properties
@@ -85,6 +98,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   // get the analysis output
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
+      dependencyViewConfig = { owner, repository, pull_number };
       let dependencies = response.getDependencies();
       dependencies.forEach((dep) => {
         if (
@@ -112,6 +126,18 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       setDiff(response.getDiff());
       setModifiedLines(response.data.modifiedLines ?? []);
     });
+    
+    fetch(
+      `http://localhost:4000/settings?owner=${owner}&repository=${repository}&pull_number=${pull_number}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          setBaseClass(data.baseClass);
+          setMainMethod(data.mainMethod);
+        }
+      })
+      .catch((err) => console.error("Error fetching settings:", err));
   }, [owner, repository, pull_number]);
 
   // update the active conflict
@@ -124,6 +150,14 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   return (
     <div id="dependency-plugin">
+      {diff ? (
+        <SettingsButton
+        baseClass={baseClass}
+        setBaseClass={setBaseClass}
+        mainMethod={mainMethod}
+        setMainMethod={setMainMethod}
+      />
+      ): null}
       <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
         {dependencies.length ? (
           <div
