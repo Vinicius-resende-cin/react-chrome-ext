@@ -4,10 +4,20 @@ import { faGear, faCaretDown, faCircleQuestion } from "@fortawesome/free-solid-s
 import "../../styles/dependency-plugin.css";
 import { getDependencyViewConfig } from "../DependencyView"; 
 
-const SettingsButton = () => {
+interface SettingsButtonProps {
+  baseClass: string;
+  setBaseClass: React.Dispatch<React.SetStateAction<string>>;
+  mainMethod: string;
+  setMainMethod: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const SettingsButton: React.FC<SettingsButtonProps> = ({
+  baseClass,
+  setBaseClass,
+  mainMethod,
+  setMainMethod,
+}) => {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
-  const [baseClass, setBaseClass] = useState("");
-  const [mainMethod, setMainMethod] = useState("");
 
   const changeDropdown = () => {
     setDropdownVisible(!isDropdownVisible);
@@ -26,21 +36,46 @@ const SettingsButton = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:4000/settings", {
-        method: "POST",
+      const checkResponse = await fetch(`http://localhost:4000/settings?owner=${owner}&repository=${repository}&pull_number=${pull_number}`, {
+        method: "GET",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          settings: settingsData, 
-        }),
       });
+  
+      if (checkResponse.ok) {
+        const existingData = await checkResponse.json();
 
-      if (response.ok) {
-        console.log("Settings succesfully saved!");
+        if (existingData) {
+          console.log("Entry found, updating with PUT...");
+          const updateResponse = await fetch("http://localhost:4000/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ settings: settingsData }),
+          });
+
+          if (updateResponse.ok) {
+            console.log("Settings successfully updated!");
+          } else {
+            console.error("Error updating settings.");
+          }
+        } else {
+          console.log("No entry found, creating with POST...");
+          const createResponse = await fetch("http://localhost:4000/settings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ settings: settingsData }),
+          });
+          
+          if (createResponse.ok) {
+            console.log("Settings successfully created!");
+          } else {
+            console.error("Error creating settings.");
+          }
+        }
       } else {
-        console.error("Error at saving settings.");
+        console.error("Error checking existing settings.");
       }
     } catch (error) {
-      console.error("Erro at request:", error);
+      console.error("Error during request:", error);
     }
   };
 
