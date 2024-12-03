@@ -44,7 +44,10 @@ module.exports = {
     ...getHtmlPlugins(["index"])
   ],
   resolve: {
-    extensions: [".tsx", ".ts", ".js"]
+    extensions: [".tsx", ".ts", ".js"],
+    alias: {
+      "@extension": path.resolve(__dirname, "src", "extension")
+    }
   },
   output: {
     path: path.join(__dirname, "dist/js"),

@@ -15,6 +15,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "baseUrl": "./src",
+    "paths": {
+      "@extension/*": ["extension/*"]
+    }
   },
   "include": ["src/**/*", "tests/**/*.ts"]
 }
