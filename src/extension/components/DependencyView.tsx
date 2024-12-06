@@ -52,7 +52,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
    */
   const updateGraph = (dep: dependency, L: lineData, R: lineData) => {
     let newGraphData;
-
+    
     // if the conflict is OA, get the LC and RC
     if (dep.type.startsWith("OA")) {
       // get the LC and RC
@@ -68,6 +68,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       const RC = { file: fileTo, line: lineTo.location.line };
 
       newGraphData = generateGraphData("oa", { L, R, LC, RC });
+    } else if (dep.type.startsWith("CONFLICT")) { // If the conflict is DF 
+      newGraphData = generateGraphData("df", {L, R});
     }
 
     // set the new graph data
