@@ -10,6 +10,7 @@ import { generateGraphData, lineData } from "./Graph/graph";
 import "../styles/dependency-plugin.css";
 import SettingsButton from "./Settings/Settings-button";
 import SettingsService from "../../services/SettingsService";
+import { getClassFromJavaFilename } from "@extension/utils";
 
 const analysisService = new AnalysisService();
 const settingsService = new SettingsService();
@@ -58,24 +59,35 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
    */
   const updateGraph = (dep: dependency, L: lineData, R: lineData) => {
     let newGraphData;
-    
-    // if the conflict is OA, get the LC and RC
+
+    // get the LC and RC
+    dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
+
+    // get the filename and line numbers of the conflict
+    let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
+    let lineFrom = dep.body.interference[0]; // first line
+    let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
+    let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+
+    const LC = { file: fileFrom, line: lineFrom.location.line };
+    const RC = { file: fileTo, line: lineTo.location.line };
+
+    // If the nodes are equal, update from the stack trace
+    if (getClassFromJavaFilename(L.file) === getClassFromJavaFilename(LC.file) && L.line === LC.line) {
+      L.file = dep.body.interference[0].stackTrace?.[0].class.replaceAll(".", "/") ?? L.file;
+      L.line = dep.body.interference[0].stackTrace?.[0].line ?? L.line;
+    }
+
+    if (getClassFromJavaFilename(R.file) === getClassFromJavaFilename(RC.file) && R.line === RC.line) {
+      R.file = dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].class.replaceAll(".", "/") ?? R.file;
+      R.line = dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].line ?? R.line;
+    }
+
     if (dep.type.startsWith("OA")) {
-      // get the LC and RC
-      dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
-
-      // get the filename and line numbers of the conflict
-      let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
-      let lineFrom = dep.body.interference[0]; // first line
-      let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
-      let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
-
-      const LC = { file: fileFrom, line: lineFrom.location.line };
-      const RC = { file: fileTo, line: lineTo.location.line };
-
       newGraphData = generateGraphData("oa", { L, R, LC, RC });
-    } else if (dep.type.startsWith("CONFLICT")) { // If the conflict is DF 
-      newGraphData = generateGraphData("df", {L, R});
+    } else if (dep.type.startsWith("CONFLICT")) {
+      // If the conflict is DF
+      newGraphData = generateGraphData("df", { L, R, LC, RC });
     }
 
     // set the new graph data
