@@ -178,7 +178,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             id="dependency-container"
             className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
             <h3 className="tw-mb-5 tw-text-red-600">
-              {dependencies.length} conflict
+              {dependencies.length} possible conflict
               {dependencies.length > 1 ? "s" : ""} reported:
             </h3>
             <ul className="tw-list-none">
