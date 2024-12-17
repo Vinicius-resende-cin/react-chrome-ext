@@ -166,9 +166,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             id="dependency-container"
             className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
             <h3 className="tw-mb-5 tw-text-red-600">
-              {dependencies.length} possíve{dependencies.length > 1 ? "is" : "l"} conflito
-              {dependencies.length > 1 ? "s" : ""} identificado
-              {dependencies.length > 1 ? "s" : ""}:
+              {dependencies.length} conflict
+              {dependencies.length > 1 ? "s" : ""} reported:
             </h3>
             <ul className="tw-list-none">
               {dependencies.map((d, i) => {
@@ -182,7 +181,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           </div>
         ) : diff ? (
           <div id="no-dependencies">
-            <p>Não foram encontradas dependências durante as análises.</p>
+            <p>No conflicts were found during the analysis</p>
           </div>
         ) : null}
 
@@ -193,8 +192,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           </div>
         ) : (
           <div id="no-analysis" className="tw-mb-3">
-            <p>Não foi encontrado nenhum registro de execução das análises...</p>
-            <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
+            <p>The analysis results were not found...</p>
+            <p>Please try again soon. If the problem persists, please contact support.</p>
           </div>
         )}
       </div>
