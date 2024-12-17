@@ -9,11 +9,18 @@ import { SerializedGraph } from "graphology-types";
 import { generateGraphData, lineData } from "./Graph/graph";
 import "../styles/dependency-plugin.css";
 import SettingsButton from "./Settings/Settings-button";
+import SettingsService from "../../services/SettingsService";
+import { getClassFromJavaFilename } from "@extension/utils";
 
 const analysisService = new AnalysisService();
+const settingsService = new SettingsService();
 
 async function getAnalysisOutput(owner: string, repository: string, pull_number: number) {
   return await analysisService.getAnalysisOutput(owner, repository, pull_number);
+}
+
+async function getSettings(owner: string, repository: string, pull_number: number) {
+  return await settingsService.getSettings(owner, repository, pull_number);
 }
 
 interface DependencyViewProps {
@@ -52,24 +59,35 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
    */
   const updateGraph = (dep: dependency, L: lineData, R: lineData) => {
     let newGraphData;
-    
-    // if the conflict is OA, get the LC and RC
+
+    // get the LC and RC
+    dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
+
+    // get the filename and line numbers of the conflict
+    let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
+    let lineFrom = dep.body.interference[0]; // first line
+    let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
+    let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+
+    const LC = { file: fileFrom, line: lineFrom.location.line };
+    const RC = { file: fileTo, line: lineTo.location.line };
+
+    // If the nodes are equal, update from the stack trace
+    if (getClassFromJavaFilename(L.file) === getClassFromJavaFilename(LC.file) && L.line === LC.line) {
+      L.file = dep.body.interference[0].stackTrace?.[0].class.replaceAll(".", "/") ?? L.file;
+      L.line = dep.body.interference[0].stackTrace?.[0].line ?? L.line;
+    }
+
+    if (getClassFromJavaFilename(R.file) === getClassFromJavaFilename(RC.file) && R.line === RC.line) {
+      R.file = dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].class.replaceAll(".", "/") ?? R.file;
+      R.line = dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].line ?? R.line;
+    }
+
     if (dep.type.startsWith("OA")) {
-      // get the LC and RC
-      dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
-
-      // get the filename and line numbers of the conflict
-      let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
-      let lineFrom = dep.body.interference[0]; // first line
-      let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
-      let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
-
-      const LC = { file: fileFrom, line: lineFrom.location.line };
-      const RC = { file: fileTo, line: lineTo.location.line };
-
       newGraphData = generateGraphData("oa", { L, R, LC, RC });
-    } else if (dep.type.startsWith("CONFLICT")) { // If the conflict is DF 
-      newGraphData = generateGraphData("df", {L, R});
+    } else if (dep.type.startsWith("CONFLICT")) {
+      // If the conflict is DF
+      newGraphData = generateGraphData("df", { L, R, LC, RC });
     }
 
     // set the new graph data
@@ -128,18 +146,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       setDiff(response.getDiff());
       setModifiedLines(response.data.modifiedLines ?? []);
     });
-    
-    fetch(
-      `http://localhost:4000/settings?owner=${owner}&repository=${repository}&pull_number=${pull_number}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data) {
-          setBaseClass(data.baseClass);
-          setMainMethod(data.mainMethod);
-        }
-      })
-      .catch((err) => console.error("Error fetching settings:", err));
+
+    // get the settings
+    getSettings(owner, repository, pull_number).then((response) => {
+      setBaseClass(response.baseClass);
+      setMainMethod(response.mainMethod);
+    });
   }, [owner, repository, pull_number]);
 
   // update the active conflict
@@ -166,9 +178,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             id="dependency-container"
             className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
             <h3 className="tw-mb-5 tw-text-red-600">
-              {dependencies.length} possíve{dependencies.length > 1 ? "is" : "l"} conflito
-              {dependencies.length > 1 ? "s" : ""} identificado
-              {dependencies.length > 1 ? "s" : ""}:
+              {dependencies.length} possible conflict
+              {dependencies.length > 1 ? "s" : ""} reported:
             </h3>
             <ul className="tw-list-none">
               {dependencies.map((d, i) => {
@@ -182,7 +193,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           </div>
         ) : diff ? (
           <div id="no-dependencies">
-            <p>Não foram encontradas dependências durante as análises.</p>
+            <p>No conflicts were found during the analysis</p>
           </div>
         ) : null}
 
@@ -193,8 +204,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           </div>
         ) : (
           <div id="no-analysis" className="tw-mb-3">
-            <p>Não foi encontrado nenhum registro de execução das análises...</p>
-            <p>É possível que a análise ainda esteja em andamento ou que não tenha sido executada.</p>
+            <p>The analysis results were not found...</p>
+            <p>Please try again soon. If the problem persists, please contact support.</p>
           </div>
         )}
       </div>
