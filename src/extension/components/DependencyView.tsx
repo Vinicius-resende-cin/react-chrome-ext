@@ -9,11 +9,17 @@ import { SerializedGraph } from "graphology-types";
 import { generateGraphData, lineData } from "./Graph/graph";
 import "../styles/dependency-plugin.css";
 import SettingsButton from "./Settings/Settings-button";
+import SettingsService from "../../services/SettingsService";
 
 const analysisService = new AnalysisService();
+const settingsService = new SettingsService();
 
 async function getAnalysisOutput(owner: string, repository: string, pull_number: number) {
   return await analysisService.getAnalysisOutput(owner, repository, pull_number);
+}
+
+async function getSettings(owner: string, repository: string, pull_number: number) {
+  return await settingsService.getSettings(owner, repository, pull_number);
 }
 
 interface DependencyViewProps {
@@ -128,18 +134,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       setDiff(response.getDiff());
       setModifiedLines(response.data.modifiedLines ?? []);
     });
-    
-    fetch(
-      `http://localhost:4000/settings?owner=${owner}&repository=${repository}&pull_number=${pull_number}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data) {
-          setBaseClass(data.baseClass);
-          setMainMethod(data.mainMethod);
-        }
-      })
-      .catch((err) => console.error("Error fetching settings:", err));
+
+    // get the settings
+    getSettings(owner, repository, pull_number).then((response) => {
+      setBaseClass(response.baseClass);
+      setMainMethod(response.mainMethod);
+    });
   }, [owner, repository, pull_number]);
 
   // update the active conflict
