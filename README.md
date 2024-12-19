@@ -28,7 +28,7 @@ npm install
 1. First, build the extension with the command:
 
 ```bash
-npm start
+npm run build
 ```
 
 2. After that, follow the instructions on [this link](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked) and select the `dist` folder to load the extension on your chrome compatible browser.
