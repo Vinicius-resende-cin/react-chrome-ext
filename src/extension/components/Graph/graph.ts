@@ -13,14 +13,18 @@ type OAlineData = {
   RC: lineData;
 };
 
-const generateGraphData = (conflictType: string, data: OAlineData | { [key: string]: lineData }) => {
+type OAoptions = {
+  variables?: { left: string; right: string };
+};
+
+const generateGraphData = (conflictType: string, data: OAlineData | { [key: string]: lineData }, options?: OAoptions) => {
   const L = data["L"];
   const R = data["R"];
   const LC = data["LC"];
   const RC = data["RC"];
 
   if (conflictType === "oa") {
-    return generateOAGraphData(L, R, LC, RC);
+    return generateOAGraphData(L, R, LC, RC, options?.variables ?? undefined);
   } else if (conflictType === "df") {
     return generateDFGraphData(L, R, LC, RC);
   } else {

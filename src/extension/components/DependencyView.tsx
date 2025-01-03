@@ -84,7 +84,14 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     if (dep.type.startsWith("OA")) {
-      newGraphData = generateGraphData("oa", { L, R, LC, RC });
+      const descriptionRegex = /<(.+:.+)> - .*<(.+:.+)>/;
+      const variables = descriptionRegex.exec(dep.body.description);
+
+      newGraphData = generateGraphData(
+        "oa",
+        { L, R, LC, RC },
+        variables ? { variables: { left: variables[1], right: variables[2] } } : undefined
+      );
     } else if (dep.type.startsWith("CONFLICT")) {
       // If the conflict is DF
       newGraphData = generateGraphData("df", { L, R, LC, RC });
@@ -166,12 +173,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     <div id="dependency-plugin">
       {diff ? (
         <SettingsButton
-        baseClass={baseClass}
-        setBaseClass={setBaseClass}
-        mainMethod={mainMethod}
-        setMainMethod={setMainMethod}
-      />
-      ): null}
+          baseClass={baseClass}
+          setBaseClass={setBaseClass}
+          mainMethod={mainMethod}
+          setMainMethod={setMainMethod}
+        />
+      ) : null}
       <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
         {dependencies.length ? (
           <div
