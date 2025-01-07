@@ -179,7 +179,8 @@ function drawHover(
 const navigateToDiffLine = (node: NodeDisplayData) => {
   if (!node || !node.label) return;
 
-  const [file, line] = node.label.split(":");
+  const labelInfos = node.label.split(" ");
+  const [file, line] = labelInfos[0].split(":");
   const diffLine = getDiffLine(file.endsWith(".java") ? file : `${file}.java`, Number(line));
   scrollAndHighlight(diffLine);
 };

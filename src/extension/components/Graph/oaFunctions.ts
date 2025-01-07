@@ -1,4 +1,4 @@
-import { getClassFromJavaFilename } from "@extension/utils";
+import { getClassFromJavaFilename, getMethodNameFromJavaMethod } from "@extension/utils";
 
 const NODE_SIZE = 15;
 const NODE_COLOR = "#FA4F40";
@@ -10,6 +10,7 @@ const EDGE_COLOR_OA = "#4F80FA";
 type lineData = {
     file: string;
     line: number;
+    method: string;
   };
 
 /**
@@ -48,7 +49,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 0,
           y: 0,
-          label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
+          label: `${getClassFromJavaFilename(L.file)}:${L.line} ${getMethodNameFromJavaMethod(L.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "top"
@@ -59,7 +60,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 0,
           y: -1,
-          label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
+          label: `${getClassFromJavaFilename(R.file)}:${R.line} ${getMethodNameFromJavaMethod(R.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "bottom"
@@ -70,7 +71,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 1,
           y: 0,
-          label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
+          label: `${getClassFromJavaFilename(LC.file)}:${LC.line} ${getMethodNameFromJavaMethod(LC.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "right"
@@ -81,7 +82,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 1,
           y: -1,
-          label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
+          label: `${getClassFromJavaFilename(RC.file)}:${RC.line} ${getMethodNameFromJavaMethod(RC.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "right"
@@ -142,7 +143,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 0,
           y: 0,
-          label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
+          label: `${getClassFromJavaFilename(L.file)}:${L.line} ${getMethodNameFromJavaMethod(L.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "top"
@@ -153,7 +154,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 1,
           y: 0,
-          label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
+          label: `${getClassFromJavaFilename(R.file)}:${R.line} ${getMethodNameFromJavaMethod(R.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "right"
@@ -184,7 +185,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 0,
           y: 0,
-          label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
+          label: `${getClassFromJavaFilename(L.file)}:${L.line} ${getMethodNameFromJavaMethod(L.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "top"
@@ -195,7 +196,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 0,
           y: -1,
-          label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
+          label: `${getClassFromJavaFilename(R.file)}:${R.line} ${getMethodNameFromJavaMethod(R.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "bottom"
@@ -206,7 +207,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 1,
           y: -1,
-          label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
+          label: `${getClassFromJavaFilename(RC.file)}:${RC.line} ${getMethodNameFromJavaMethod(RC.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "right"
@@ -257,7 +258,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 0,
           y: 0,
-          label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
+          label: `${getClassFromJavaFilename(L.file)}:${L.line} ${getMethodNameFromJavaMethod(L.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "top"
@@ -268,7 +269,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 0,
           y: -1,
-          label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
+          label: `${getClassFromJavaFilename(R.file)}:${R.line} ${getMethodNameFromJavaMethod(R.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "bottom"
@@ -279,7 +280,7 @@ const generateOAGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineDat
         attributes: {
           x: 1,
           y: 0,
-          label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
+          label: `${getClassFromJavaFilename(LC.file)}:${LC.line} ${getMethodNameFromJavaMethod(LC.method)}`,
           size: NODE_SIZE,
           color: NODE_COLOR,
           labelPosition: "right"

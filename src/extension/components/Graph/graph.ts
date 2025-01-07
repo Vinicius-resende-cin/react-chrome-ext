@@ -4,6 +4,7 @@ import { generateOAGraphData } from "./oaFunctions";
 type lineData = {
   file: string;
   line: number;
+  method: string;
 };
 
 type OAlineData = {
