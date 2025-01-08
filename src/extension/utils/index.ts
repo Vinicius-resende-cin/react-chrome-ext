@@ -6,4 +6,9 @@ const getClassFromJavaFilename = (filename: string): string | undefined => {
     .pop();
 };
 
-export { getClassFromJavaFilename };
+const getMethodNameFromJavaMethod = (methodName: string): string | undefined => {
+  const result = methodName.split(" ").pop()?.replace(">", "");
+  return result?.endsWith("()") ? result : `${result}()`;
+}
+
+export { getClassFromJavaFilename, getMethodNameFromJavaMethod };
