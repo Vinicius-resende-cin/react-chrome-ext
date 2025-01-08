@@ -40,18 +40,18 @@ function drawLabel(
   if (data.labelPosition === "top") {
     context.textAlign = "center"; // Center align the text
     context.fillText(
-      data.label,
+      `${data.label} in ${data.method}`,
       data.x,
       data.y - data.size - LABEL_Y_OFFSET - HOVER_PADDING // Adjust the offset to position label above the node
     );
   } else if (data.labelPosition == "right") {
     context.textAlign = "left"; // Left align the text
-    context.fillText(data.label, data.x + data.size + 3, data.y + size / 3);
+    context.fillText(`${data.label} in ${data.method}`, data.x + data.size + 3, data.y + size / 3);
   } else {
     //default to bottom
     context.textAlign = "center"; // Center align the text
     context.fillText(
-      data.label,
+      `${data.label} in ${data.method}`,
       data.x,
       data.y + data.size + 3.5 * LABEL_Y_OFFSET + HOVER_PADDING // Adjust the offset to position label above the node
     );
@@ -179,8 +179,7 @@ function drawHover(
 const navigateToDiffLine = (node: NodeDisplayData) => {
   if (!node || !node.label) return;
 
-  const labelInfos = node.label.split(" ");
-  const [file, line] = labelInfos[0].split(":");
+  const [file, line] = node.label.split(":");
   const diffLine = getDiffLine(file.endsWith(".java") ? file : `${file}.java`, Number(line));
   scrollAndHighlight(diffLine);
 };
