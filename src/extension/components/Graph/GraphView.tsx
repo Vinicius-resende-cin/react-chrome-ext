@@ -21,6 +21,14 @@ const CAMERA_DEFAULT_ZOOMING_RATIO = 1.2;
 
 const sigmaStyle = { height: "500px", width: "100%" };
 
+// Generate the message rendered for each node in the graph
+export const generateNodeLabel = (node: PartialButFor<NodeDisplayData, "x" | "y" | "size" | "label" | "color">) => {
+  const { label, method } = node;
+  if (!label) return "";
+  if (!method) return label;
+  return `${label} in ${method}`;
+};
+
 // Custom node label renderer
 function drawLabel(
   context: CanvasRenderingContext2D,
@@ -36,22 +44,24 @@ function drawLabel(
   context.font = `${weight} ${size}px ${font}`;
   context.fillStyle = "#000";
 
+  const message = generateNodeLabel(data);
+
   // Render the label above the node by adjusting the y position
   if (data.labelPosition === "top") {
     context.textAlign = "center"; // Center align the text
     context.fillText(
-      `${data.label} in ${data.method}`,
+      message,
       data.x,
       data.y - data.size - LABEL_Y_OFFSET - HOVER_PADDING // Adjust the offset to position label above the node
     );
   } else if (data.labelPosition == "right") {
     context.textAlign = "left"; // Left align the text
-    context.fillText(`${data.label} in ${data.method}`, data.x + data.size + 3, data.y + size / 3);
+    context.fillText(message, data.x + data.size + 3, data.y + size / 3);
   } else {
     //default to bottom
     context.textAlign = "center"; // Center align the text
     context.fillText(
-      `${data.label} in ${data.method}`,
+      message,
       data.x,
       data.y + data.size + 3.5 * LABEL_Y_OFFSET + HOVER_PADDING // Adjust the offset to position label above the node
     );
@@ -142,7 +152,10 @@ function drawHover(
   context.shadowColor = "#000";
 
   if (typeof data.label === "string") {
-    const textWidth = context.measureText(data.label).width,
+    const message = generateNodeLabel(data);
+
+    // Calculate the width of the text
+    const textWidth = context.measureText(message).width,
       boxWidth = Math.round(textWidth + 5),
       boxHeight = Math.round(size + 2 * HOVER_PADDING),
       radius = Math.max(data.size, size / 2) + HOVER_PADDING;
