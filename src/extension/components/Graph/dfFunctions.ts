@@ -27,18 +27,40 @@ type lineData = {
  * @param RC - line that derives from the line modified by the right side and directly involved in the conflict
  * @returns an object with the nodes and edges for the graph that represents the DF conflict format
  */
-const generateDFGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineData) => {
+const generateDFGraphData = (
+  L: lineData,
+  R: lineData,
+  LC: lineData,
+  RC: lineData,
+  variables?: { left: string; right: string }
+) => {
+  let graphData;
   if (`${getClassFromJavaFilename(L.file)}:${L.line}` === `${getClassFromJavaFilename(LC.file)}:${LC.line}`) {
     if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-      return dfGraphDataTwoNodes(L, R);
+      graphData = dfGraphDataTwoNodes(L, R);
     } else {
-      return dfGraphDataThreeNodesRC(L, R, RC);
+      graphData = dfGraphDataThreeNodesRC(L, R, RC);
     }
   } else if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-    return dfGraphDataThreeNodesLC(L, R, LC);
+    graphData = dfGraphDataThreeNodesLC(L, R, LC);
   } else {
-    return dfGraphDataFourNodes(L, R, LC, RC);
+    graphData = dfGraphDataFourNodes(L, R, LC, RC);
   }
+
+  return variables ? insertVariableInformation(graphData.nodes, graphData.edges, variables) : graphData;
+};
+
+const insertVariableInformation = (nodes: any[], edges: any[], variables: { left: string; right: string }) => {
+  const dfEdge = edges.find((edge) => edge.attributes.label === "DF");
+  if (!dfEdge) return { nodes, edges };
+
+  const leftNode = nodes.find((node) => node.key === dfEdge.source);
+  const rightNode = nodes.find((node) => node.key === dfEdge.target);
+  if (!leftNode || !rightNode) return { nodes, edges };
+
+  leftNode.attributes.message = `assigns ${variables.left}`;
+  rightNode.attributes.message = `uses ${variables.right}`;
+  return { nodes, edges };
 };
 
 const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData) => {

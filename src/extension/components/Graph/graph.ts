@@ -26,7 +26,7 @@ const generateGraphData = (conflictType: string, data: OAlineData | { [key: stri
   if (conflictType === "oa") {
     return generateOAGraphData(L, R, LC, RC, options?.variables ?? undefined);
   } else if (conflictType === "df") {
-    return generateDFGraphData(L, R, LC, RC);
+    return generateDFGraphData(L, R, LC, RC, options?.variables ?? undefined);
   } else {
     throw new Error("Conflict type not supported");
   }

@@ -93,8 +93,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         variables ? { variables: { left: variables[1], right: variables[2] } } : undefined
       );
     } else if (dep.type.startsWith("CONFLICT")) {
+      const variables = dep.body.description.split(" - ").map((v) => /<(.+:.+)>/.exec(v)?.[1] ?? v);
+
       // If the conflict is DF
-      newGraphData = generateGraphData("df", { L, R, LC, RC });
+      newGraphData = generateGraphData("df", { L, R, LC, RC }, { variables: { left: variables[0], right: variables[1] } });
     }
 
     // set the new graph data
