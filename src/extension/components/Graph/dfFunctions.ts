@@ -59,7 +59,7 @@ const insertVariableInformation = (nodes: any[], edges: any[], variables: { left
   if (!leftNode || !rightNode) return { nodes, edges };
 
   leftNode.attributes.message = `assigns ${variables.left}`;
-  rightNode.attributes.message = `uses ${variables.right}`;
+  rightNode.attributes.message = `uses ${variables.right !== "unknown" ? variables.right : variables.left}`;
   return { nodes, edges };
 };
 
