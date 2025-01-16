@@ -57,7 +57,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   /*
    * methods
    */
-  const updateGraph = (dep: dependency, L: lineData, R: lineData) => {
+  const updateGraph = (dep: dependency, L: lineData, R: lineData, LBranch: "L" | "R") => {
     let newGraphData;
 
     // get the LC and RC
@@ -84,10 +84,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     if (dep.type.startsWith("OA")) {
-      newGraphData = generateGraphData("oa", { L, R, LC, RC });
+      newGraphData = generateGraphData("oa", { L, R, LC, RC }, LBranch);
     } else if (dep.type.startsWith("CONFLICT")) {
       // If the conflict is DF
-      newGraphData = generateGraphData("df", { L, R, LC, RC });
+      newGraphData = generateGraphData("df", { L, R, LC, RC }, LBranch);
     }
 
     // set the new graph data
@@ -102,6 +102,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
     let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
+    //data to check if the conlict flow is inverted
+    let LBranch = lineFrom.branch;
+
     // if the filename is unknown, try to get the first valid one from the stack trace
     if (fileFrom === "UNKNOWN" || fileTo === "UNKNOWN") {
       updateLocationFromStackTrace(dep, { inplace: true });
@@ -112,7 +115,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     // declare the graph data variables
     let L: lineData = { file: fileFrom, line: lineFrom.location.line, method: dep.body.interference[0].stackTrace?.[0].method ?? lineFrom.location.method};
     let R: lineData = { file: fileTo, line: lineTo.location.line, method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].method ?? lineTo.location.method };
-    updateGraph(dep, L, R);
+    updateGraph(dep, L, R, LBranch);
   };
 
   // get the analysis output
