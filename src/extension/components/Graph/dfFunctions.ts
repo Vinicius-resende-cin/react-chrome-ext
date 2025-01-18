@@ -27,21 +27,21 @@ type lineData = {
  * @param RC - line that derives from the line modified by the right side and directly involved in the conflict
  * @returns an object with the nodes and edges for the graph that represents the DF conflict format
  */
-const generateDFGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineData, LColor: string, RColor: string) => {
+const generateDFGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineData, lColor: string, rColor: string) => {
   if (`${getClassFromJavaFilename(L.file)}:${L.line}` === `${getClassFromJavaFilename(LC.file)}:${LC.line}`) {
     if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-      return dfGraphDataTwoNodes(L, R, LColor, RColor);
+      return dfGraphDataTwoNodes(L, R, lColor, rColor);
     } else {
-      return dfGraphDataThreeNodesRC(L, R, RC, LColor, RColor);
+      return dfGraphDataThreeNodesRC(L, R, RC, lColor, rColor);
     }
   } else if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-    return dfGraphDataThreeNodesLC(L, R, LC, LColor, RColor);
+    return dfGraphDataThreeNodesLC(L, R, LC, lColor, rColor);
   } else {
-    return dfGraphDataFourNodes(L, R, LC, RC, LColor, RColor);
+    return dfGraphDataFourNodes(L, R, LC, RC, lColor, rColor);
   }
 };
 
-const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData, LColor: string, RColor: string) => {
+const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -51,7 +51,7 @@ const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
         label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         method: `${getMethodNameFromJavaMethod(L.method)}`,
         size: NODE_SIZE,
-        color: LColor,
+        color: lColor,
         labelPosition: "top"
       }
     },
@@ -63,7 +63,7 @@ const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
         label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         method: `${getMethodNameFromJavaMethod(R.method)}`,
         size: NODE_SIZE,
-        color: RColor,
+        color: rColor,
         labelPosition: "bottom"
       }
     },
@@ -75,7 +75,7 @@ const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
         label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
         method: `${getMethodNameFromJavaMethod(LC.method)}`,
         size: NODE_SIZE,
-        color: LColor,
+        color: lColor,
         labelPosition: "right"
       }
     },
@@ -87,7 +87,7 @@ const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
         label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
         method: `${getMethodNameFromJavaMethod(RC.method)}`,
         size: NODE_SIZE,
-        color: RColor,
+        color: rColor,
         labelPosition: "right"
       }
     }
@@ -139,7 +139,7 @@ const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
   return { nodes, edges };
 };
 
-const dfGraphDataTwoNodes = (L: lineData, R: lineData, LColor: string, RColor: string) => {
+const dfGraphDataTwoNodes = (L: lineData, R: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -149,7 +149,7 @@ const dfGraphDataTwoNodes = (L: lineData, R: lineData, LColor: string, RColor: s
         label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         method: `${getMethodNameFromJavaMethod(L.method)}`,
         size: NODE_SIZE,
-        color: LColor,
+        color: lColor,
         labelPosition: "top"
       }
     },
@@ -161,7 +161,7 @@ const dfGraphDataTwoNodes = (L: lineData, R: lineData, LColor: string, RColor: s
         label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         method: `${getMethodNameFromJavaMethod(R.method)}`,
         size: NODE_SIZE,
-        color: RColor,
+        color: rColor,
         labelPosition: "right"
       }
     }
@@ -183,7 +183,7 @@ const dfGraphDataTwoNodes = (L: lineData, R: lineData, LColor: string, RColor: s
   return { nodes, edges };
 };
 
-const dfGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData, LColor: string, RColor: string) => {
+const dfGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -193,7 +193,7 @@ const dfGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData, LColor:
         label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         method: `${getMethodNameFromJavaMethod(L.method)}`,
         size: NODE_SIZE,
-        color: LColor,
+        color: lColor,
         labelPosition: "top"
       }
     },
@@ -205,7 +205,7 @@ const dfGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData, LColor:
         label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         method: `${getMethodNameFromJavaMethod(R.method)}`,
         size: NODE_SIZE,
-        color: RColor,
+        color: rColor,
         labelPosition: "bottom"
       }
     },
@@ -217,7 +217,7 @@ const dfGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData, LColor:
         label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
         method: `${getMethodNameFromJavaMethod(RC.method)}`,
         size: NODE_SIZE,
-        color: RColor,
+        color: rColor,
         labelPosition: "right"
       }
     }
@@ -259,7 +259,7 @@ const dfGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData, LColor:
   return { nodes, edges };
 };
 
-const dfGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData, LColor: string, RColor: string) => {
+const dfGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -269,7 +269,7 @@ const dfGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData, LColor:
         label: `${getClassFromJavaFilename(L.file)}:${L.line}`,
         method: `${getMethodNameFromJavaMethod(L.method)}`,
         size: NODE_SIZE,
-        color: LColor,
+        color: lColor,
         labelPosition: "top"
       }
     },
@@ -281,7 +281,7 @@ const dfGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData, LColor:
         label: `${getClassFromJavaFilename(R.file)}:${R.line}`,
         method: `${getMethodNameFromJavaMethod(R.method)}`,
         size: NODE_SIZE,
-        color: RColor,
+        color: rColor,
         labelPosition: "bottom"
       }
     },
@@ -293,7 +293,7 @@ const dfGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData, LColor:
         label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
         method: `${getMethodNameFromJavaMethod(LC.method)}`,
         size: NODE_SIZE,
-        color: LColor,
+        color: lColor,
         labelPosition: "right"
       }
     }
