@@ -10,7 +10,7 @@ import { generateGraphData, lineData } from "./Graph/graph";
 import "../styles/dependency-plugin.css";
 import SettingsButton from "./Settings/Settings-button";
 import SettingsService from "../../services/SettingsService";
-import { getClassFromJavaFilename } from "@extension/utils";
+import { getClassFromJavaFilename, isLineFromLeft } from "@extension/utils";
 
 const analysisService = new AnalysisService();
 const settingsService = new SettingsService();
@@ -69,7 +69,11 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
     let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
-    const LC = { file: fileFrom, line: lineFrom.location.line, method: lineFrom.stackTrace?.[1].method ?? lineFrom.location.method };
+    const LC = {
+      file: fileFrom,
+      line: lineFrom.location.line,
+      method: lineFrom.stackTrace?.[1].method ?? lineFrom.location.method
+    };
     const RC = { file: fileTo, line: lineTo.location.line, method: lineTo.stackTrace?.[1].method ?? lineTo.location.method };
 
     // If the nodes are equal, update from the stack trace
@@ -83,6 +87,18 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       R.line = dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].line ?? R.line;
     }
 
+    //Sending the correct colors to the nodes
+    let lColor = "";
+    let rColor = "";
+
+    if (isLineFromLeft(L, modifiedLines)) {
+      lColor = "#1E90FF"; //azul
+      rColor = "#228B22"; //verde
+    } else {
+      lColor = "#228B22"; //verde
+      rColor = "#1E90FF"; //azul
+    }
+
     if (dep.type.startsWith("OA")) {
       const descriptionRegex = /<(.+:.+)> - .*<(.+:.+)>/;
       const variables = descriptionRegex.exec(dep.body.description);
@@ -90,13 +106,17 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       newGraphData = generateGraphData(
         "oa",
         { L, R, LC, RC },
+        lColor,
+        rColor,
         variables ? { variables: { left: variables[1], right: variables[2] } } : undefined
       );
     } else if (dep.type.startsWith("CONFLICT")) {
       const variables = dep.body.description.split(" - ").map((v) => /<(.+:.+)>/.exec(v)?.[1] ?? v);
 
       // If the conflict is DF
-      newGraphData = generateGraphData("df", { L, R, LC, RC }, { variables: { left: variables[0], right: variables[1] } });
+      newGraphData = generateGraphData("df", { L, R, LC, RC }, lColor, rColor, {
+        variables: { left: variables[0], right: variables[1] }
+      });
     }
 
     // set the new graph data
@@ -119,8 +139,16 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     // declare the graph data variables
-    let L: lineData = { file: fileFrom, line: lineFrom.location.line, method: dep.body.interference[0].stackTrace?.[0].method ?? lineFrom.location.method};
-    let R: lineData = { file: fileTo, line: lineTo.location.line, method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].method ?? lineTo.location.method };
+    let L: lineData = {
+      file: fileFrom,
+      line: lineFrom.location.line,
+      method: dep.body.interference[0].stackTrace?.[0].method ?? lineFrom.location.method
+    };
+    let R: lineData = {
+      file: fileTo,
+      line: lineTo.location.line,
+      method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].method ?? lineTo.location.method
+    };
     updateGraph(dep, L, R);
   };
 
