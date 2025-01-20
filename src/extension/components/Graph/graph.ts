@@ -14,16 +14,16 @@ type OAlineData = {
   RC: lineData;
 };
 
-const generateGraphData = (conflictType: string, data: OAlineData | { [key: string]: lineData }) => {
+const generateGraphData = (conflictType: string, data: OAlineData | { [key: string]: lineData }, lColor: string, rColor: string) => {
   const L = data["L"];
   const R = data["R"];
   const LC = data["LC"];
   const RC = data["RC"];
 
   if (conflictType === "oa") {
-    return generateOAGraphData(L, R, LC, RC);
+    return generateOAGraphData(L, R, LC, RC, lColor, rColor);
   } else if (conflictType === "df") {
-    return generateDFGraphData(L, R, LC, RC);
+    return generateDFGraphData(L, R, LC, RC, lColor, rColor);
   } else {
     throw new Error("Conflict type not supported");
   }
