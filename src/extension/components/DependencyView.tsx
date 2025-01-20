@@ -10,7 +10,7 @@ import { generateGraphData, lineData } from "./Graph/graph";
 import "../styles/dependency-plugin.css";
 import SettingsButton from "./Settings/Settings-button";
 import SettingsService from "../../services/SettingsService";
-import { getClassFromJavaFilename } from "@extension/utils";
+import { getClassFromJavaFilename, isLineFromLeft } from "@extension/utils";
 
 const analysisService = new AnalysisService();
 const settingsService = new SettingsService();
@@ -69,7 +69,11 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
     let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
-    const LC = { file: fileFrom, line: lineFrom.location.line, method: lineFrom.stackTrace?.[1].method ?? lineFrom.location.method };
+    const LC = {
+      file: fileFrom,
+      line: lineFrom.location.line,
+      method: lineFrom.stackTrace?.[1].method ?? lineFrom.location.method
+    };
     const RC = { file: fileTo, line: lineTo.location.line, method: lineTo.stackTrace?.[1].method ?? lineTo.location.method };
 
     // If the nodes are equal, update from the stack trace
@@ -87,20 +91,17 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let lColor = "";
     let rColor = "";
 
-    if (L.line == modifiedLines[0].leftAdded[0]) {
+    if (isLineFromLeft(L, modifiedLines)) {
       lColor = "#1E90FF"; //azul
       rColor = "#228B22"; //verde
-    }else {
+    } else {
       lColor = "#228B22"; //verde
       rColor = "#1E90FF"; //azul
     }
 
     if (dep.type.startsWith("OA")) {
-
       newGraphData = generateGraphData("oa", { L, R, LC, RC }, lColor, rColor);
-
     } else if (dep.type.startsWith("CONFLICT")) {
-
       // If the conflict is DF
       newGraphData = generateGraphData("df", { L, R, LC, RC }, lColor, rColor);
     }
@@ -115,7 +116,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
     let lineFrom = dep.body.interference[0]; // first line
     let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
-    let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line   
+    let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
     // if the filename is unknown, try to get the first valid one from the stack trace
     if (fileFrom === "UNKNOWN" || fileTo === "UNKNOWN") {
@@ -125,8 +126,16 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     // declare the graph data variables
-    let L: lineData = { file: fileFrom, line: lineFrom.location.line, method: dep.body.interference[0].stackTrace?.[0].method ?? lineFrom.location.method};
-    let R: lineData = { file: fileTo, line: lineTo.location.line, method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].method ?? lineTo.location.method };
+    let L: lineData = {
+      file: fileFrom,
+      line: lineFrom.location.line,
+      method: dep.body.interference[0].stackTrace?.[0].method ?? lineFrom.location.method
+    };
+    let R: lineData = {
+      file: fileTo,
+      line: lineTo.location.line,
+      method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].method ?? lineTo.location.method
+    };
     updateGraph(dep, L, R);
   };
 
@@ -181,12 +190,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     <div id="dependency-plugin">
       {diff ? (
         <SettingsButton
-        baseClass={baseClass}
-        setBaseClass={setBaseClass}
-        mainMethod={mainMethod}
-        setMainMethod={setMainMethod}
-      />
-      ): null}
+          baseClass={baseClass}
+          setBaseClass={setBaseClass}
+          mainMethod={mainMethod}
+          setMainMethod={setMainMethod}
+        />
+      ) : null}
       <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
         {dependencies.length ? (
           <div
