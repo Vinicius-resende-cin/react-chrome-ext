@@ -41,7 +41,7 @@ function drawLabel(
     context.textAlign = "center"; // Center align the text
 
     context.fillText(
-      data.label,
+      `${data.label} in ${data.method}`,
       data.x,
       data.y - data.size - LABEL_Y_OFFSET - HOVER_PADDING // Adjust the offset to position label above the node
     );
@@ -53,7 +53,7 @@ function drawLabel(
   } else if (data.labelPosition === "right") {
     context.textAlign = "left"; // Left align the text
 
-    context.fillText(data.label, data.x + data.size + 3, data.y + size / 3);
+    context.fillText(`${data.label} in ${data.method}`, data.x + data.size + 3, data.y + size / 3);
 
     if (data.message) {
       context.fillStyle = "#f00";
@@ -64,7 +64,7 @@ function drawLabel(
     context.textAlign = "center"; // Center align the text
 
     context.fillText(
-      data.label,
+      `${data.label} in ${data.method}`,
       data.x,
       data.y + data.size + 3.5 * LABEL_Y_OFFSET + HOVER_PADDING // Adjust the offset to position label below the node
     );

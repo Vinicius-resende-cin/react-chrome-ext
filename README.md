@@ -1,46 +1,41 @@
-# Getting Started with Create React App
+# Github Code Review + Semantic Conflicts
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This chrome extension introduces information about semantic conflicts reported by code analysis tools to the Github pull request page.
 
-## Available Scripts
+_\*The analysis information is located on a separated database. This extension only modifies the UI to display the conflicts._
 
-In the project directory, you can run:
+## Table of Contents
 
-### `npm start`
+- [Installation](#installation)
+- [Usage](#usage)
+- [Related repositories](#related-repositories)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Installation
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```bash
+# Clone the repository
+git clone https://github.com/Vinicius-resende-cin/react-chrome-ext.git
 
-### `npm test`
+# Navigate to the project directory
+cd react-chrome-ext
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Install dependencies
+npm install
+```
 
-### `npm run build`
+## Usage
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. First, build the extension with the command:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+npm run build
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. After that, follow the instructions on [this link](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked) and select the `dist` folder to load the extension on your chrome compatible browser.
 
-### `npm run eject`
+3. Now you can access a pull request page and the new tab will be available.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Related repositories
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Github app (executes code analysis on pull requests): [basic-app](https://github.com/Vinicius-resende-cin/basic-app)
+- Database server: [github-plugin-server](https://github.com/Vinicius-resende-cin/github-plugin-server)

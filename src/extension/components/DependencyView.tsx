@@ -69,8 +69,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
     let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
 
-    const LC = { file: fileFrom, line: lineFrom.location.line };
-    const RC = { file: fileTo, line: lineTo.location.line };
+    const LC = { file: fileFrom, line: lineFrom.location.line, method: lineFrom.stackTrace?.[1].method ?? lineFrom.location.method };
+    const RC = { file: fileTo, line: lineTo.location.line, method: lineTo.stackTrace?.[1].method ?? lineTo.location.method };
 
     // If the nodes are equal, update from the stack trace
     if (getClassFromJavaFilename(L.file) === getClassFromJavaFilename(LC.file) && L.line === LC.line) {
@@ -119,8 +119,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     // declare the graph data variables
-    let L: lineData = { file: fileFrom, line: lineFrom.location.line };
-    let R: lineData = { file: fileTo, line: lineTo.location.line };
+    let L: lineData = { file: fileFrom, line: lineFrom.location.line, method: dep.body.interference[0].stackTrace?.[0].method ?? lineFrom.location.method};
+    let R: lineData = { file: fileTo, line: lineTo.location.line, method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].method ?? lineTo.location.method };
     updateGraph(dep, L, R);
   };
 
