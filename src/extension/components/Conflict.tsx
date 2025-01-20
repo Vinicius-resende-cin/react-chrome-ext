@@ -45,9 +45,16 @@ export default function Conflict({ index, dependency, setConflict }: ConflictPro
 
   return (
     <div className="tw-mb-3 tw-cursor-pointer tw-w-fit" onClick={() => setConflict(index)}>
+      {dependency.type === "CONFLICT" ? (
+      <span>
+        {"DF CONFLICT"};
+      </span>
+    ) : (
       <span>
         {dependency.label} ({dependency.type})&nbsp;
       </span>
+    )}
+      
       <p className="tw-text-gray-400">
         in {locationStrings.from} &rarr; {locationStrings.to}
       </p>

@@ -100,10 +100,23 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     if (dep.type.startsWith("OA")) {
-      newGraphData = generateGraphData("oa", { L, R, LC, RC }, lColor, rColor);
+      const descriptionRegex = /<(.+:.+)> - .*<(.+:.+)>/;
+      const variables = descriptionRegex.exec(dep.body.description);
+
+      newGraphData = generateGraphData(
+        "oa",
+        { L, R, LC, RC },
+        lColor,
+        rColor,
+        variables ? { variables: { left: variables[1], right: variables[2] } } : undefined
+      );
     } else if (dep.type.startsWith("CONFLICT")) {
+      const variables = dep.body.description.split(" - ").map((v) => /<(.+:.+)>/.exec(v)?.[1] ?? v);
+
       // If the conflict is DF
-      newGraphData = generateGraphData("df", { L, R, LC, RC }, lColor, rColor);
+      newGraphData = generateGraphData("df", { L, R, LC, RC }, lColor, rColor, {
+        variables: { left: variables[0], right: variables[1] }
+      });
     }
 
     // set the new graph data

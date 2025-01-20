@@ -49,22 +49,40 @@ function drawLabel(
   // Render the label above the node by adjusting the y position
   if (data.labelPosition === "top") {
     context.textAlign = "center"; // Center align the text
+
     context.fillText(
       message,
       data.x,
       data.y - data.size - LABEL_Y_OFFSET - HOVER_PADDING // Adjust the offset to position label above the node
     );
-  } else if (data.labelPosition == "right") {
+
+    if (data.message) {
+      context.fillStyle = "#f00";
+      context.fillText(`(${data.message})`, data.x, data.y - data.size - LABEL_Y_OFFSET - HOVER_PADDING - size - 6);
+    }
+  } else if (data.labelPosition === "right") {
     context.textAlign = "left"; // Left align the text
+
     context.fillText(message, data.x + data.size + 3, data.y + size / 3);
+
+    if (data.message) {
+      context.fillStyle = "#f00";
+      context.fillText(`(${data.message})`, data.x + data.size + 3, data.y + size + 6);
+    }
   } else {
     //default to bottom
     context.textAlign = "center"; // Center align the text
+
     context.fillText(
       message,
       data.x,
-      data.y + data.size + 3.5 * LABEL_Y_OFFSET + HOVER_PADDING // Adjust the offset to position label above the node
+      data.y + data.size + 3.5 * LABEL_Y_OFFSET + HOVER_PADDING // Adjust the offset to position label below the node
     );
+
+    if (data.message) {
+      context.fillStyle = "#f00";
+      context.fillText(`(${data.message})`, data.x, data.y + data.size + 3.5 * LABEL_Y_OFFSET + HOVER_PADDING + size + 6);
+    }
   }
 }
 
@@ -164,7 +182,7 @@ function drawHover(
       // Offset to place the label background above the node
       const labelOffsetY = data.size + boxHeight + HOVER_PADDING;
       drawLabelRectTop(context, data, boxWidth, boxHeight, labelOffsetY, radius);
-    } else if (data.labelPosition == "right") {
+    } else if (data.labelPosition === "right") {
       const labelOffsetX = Math.sqrt(Math.abs(Math.pow(radius, 2) - Math.pow(boxHeight / 2, 2)));
       drawLabelRectRight(context, data, boxWidth, boxHeight, labelOffsetX, radius);
     } else {
