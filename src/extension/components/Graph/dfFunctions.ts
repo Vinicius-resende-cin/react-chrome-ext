@@ -27,18 +27,42 @@ type lineData = {
  * @param RC - line that derives from the line modified by the right side and directly involved in the conflict
  * @returns an object with the nodes and edges for the graph that represents the DF conflict format
  */
-const generateDFGraphData = (L: lineData, R: lineData, LC: lineData, RC: lineData, lColor: string, rColor: string) => {
+const generateDFGraphData = (
+  L: lineData,
+  R: lineData,
+  LC: lineData,
+  RC: lineData,
+  lColor: string,
+  rColor: string,
+  variables?: { left: string; right: string }
+) => {
+  let graphData;
   if (`${getClassFromJavaFilename(L.file)}:${L.line}` === `${getClassFromJavaFilename(LC.file)}:${LC.line}`) {
     if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-      return dfGraphDataTwoNodes(L, R, lColor, rColor);
+      graphData = dfGraphDataTwoNodes(L, R, lColor, rColor);
     } else {
-      return dfGraphDataThreeNodesRC(L, R, RC, lColor, rColor);
+      graphData = dfGraphDataThreeNodesRC(L, R, RC, lColor, rColor);
     }
   } else if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-    return dfGraphDataThreeNodesLC(L, R, LC, lColor, rColor);
+    graphData = dfGraphDataThreeNodesLC(L, R, LC, lColor, rColor);
   } else {
-    return dfGraphDataFourNodes(L, R, LC, RC, lColor, rColor);
+    graphData = dfGraphDataFourNodes(L, R, LC, RC, lColor, rColor);
   }
+
+  return variables ? insertVariableInformation(graphData.nodes, graphData.edges, variables) : graphData;
+};
+
+const insertVariableInformation = (nodes: any[], edges: any[], variables: { left: string; right: string }) => {
+  const dfEdge = edges.find((edge) => edge.attributes.label === "DF");
+  if (!dfEdge) return { nodes, edges };
+
+  const leftNode = nodes.find((node) => node.key === dfEdge.source);
+  const rightNode = nodes.find((node) => node.key === dfEdge.target);
+  if (!leftNode || !rightNode) return { nodes, edges };
+
+  leftNode.attributes.message = `assigns ${variables.left}`;
+  rightNode.attributes.message = `uses ${variables.right !== "unknown" ? variables.right : variables.left}`;
+  return { nodes, edges };
 };
 
 const dfGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData, lColor: string, rColor: string) => {
