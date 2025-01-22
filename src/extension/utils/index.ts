@@ -14,11 +14,13 @@ const getMethodNameFromJavaMethod = (methodName: string): string | undefined => 
   return result?.endsWith("()") ? result : `${result}()`;
 };
 
-const isLineFromLeft = (line: lineData, modlines: modLine[]): boolean => {
+const isLineFromLeft = (line: lineData, call:lineData, modlines: modLine[]): boolean => {
   return modlines.some(
     (modLine) =>
-      getClassFromJavaFilename(modLine.file) === getClassFromJavaFilename(line.file) &&
-      (modLine.leftAdded.includes(line.line) || modLine.leftRemoved.includes(line.line))
+      (getClassFromJavaFilename(modLine.file) === getClassFromJavaFilename(line.file) &&
+      (modLine.leftAdded.includes(line.line) || modLine.leftRemoved.includes(line.line))) ||
+      (getClassFromJavaFilename(modLine.file) === getClassFromJavaFilename(call.file) &&
+      (modLine.leftAdded.includes(call.line) || modLine.leftRemoved.includes(call.line)))
   );
 };
 
