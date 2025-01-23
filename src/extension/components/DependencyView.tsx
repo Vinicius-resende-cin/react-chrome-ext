@@ -91,7 +91,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let lColor = "";
     let rColor = "";
 
-    if (isLineFromLeft(L, modifiedLines)) {
+    const leftLines = [L, LC];
+
+    if (isLineFromLeft(leftLines, modifiedLines)) {
       lColor = "#1E90FF"; //azul
       rColor = "#228B22"; //verde
     } else {
