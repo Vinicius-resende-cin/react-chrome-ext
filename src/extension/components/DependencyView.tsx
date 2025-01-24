@@ -72,19 +72,24 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     const LC = {
       file: fileFrom,
       line: lineFrom.location.line,
-      method: lineFrom.stackTrace?.[1].method ?? lineFrom.location.method
+      method: lineFrom.stackTrace?.at(1)?.method ?? lineFrom.location.method
     };
-    const RC = { file: fileTo, line: lineTo.location.line, method: lineTo.stackTrace?.[1].method ?? lineTo.location.method };
+    const RC = {
+      file: fileTo,
+      line: lineTo.location.line,
+      method: lineTo.stackTrace?.at(1)?.method ?? lineTo.location.method
+    };
 
     // If the nodes are equal, update from the stack trace
     if (getClassFromJavaFilename(L.file) === getClassFromJavaFilename(LC.file) && L.line === LC.line) {
-      L.file = dep.body.interference[0].stackTrace?.[0].class.replaceAll(".", "/") ?? L.file;
-      L.line = dep.body.interference[0].stackTrace?.[0].line ?? L.line;
+      L.file = dep.body.interference[0].stackTrace?.at(0)?.class.replaceAll(".", "/") ?? L.file;
+      L.line = dep.body.interference[0].stackTrace?.at(0)?.line ?? L.line;
     }
 
     if (getClassFromJavaFilename(R.file) === getClassFromJavaFilename(RC.file) && R.line === RC.line) {
-      R.file = dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].class.replaceAll(".", "/") ?? R.file;
-      R.line = dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].line ?? R.line;
+      R.file =
+        dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.class.replaceAll(".", "/") ?? R.file;
+      R.line = dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.line ?? R.line;
     }
 
     //Sending the correct colors to the nodes
@@ -144,12 +149,12 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let L: lineData = {
       file: fileFrom,
       line: lineFrom.location.line,
-      method: dep.body.interference[0].stackTrace?.[0].method ?? lineFrom.location.method
+      method: dep.body.interference[0].stackTrace?.at(0)?.method ?? lineFrom.location.method
     };
     let R: lineData = {
       file: fileTo,
       line: lineTo.location.line,
-      method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.[0].method ?? lineTo.location.method
+      method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ?? lineTo.location.method
     };
     updateGraph(dep, L, R);
   };
