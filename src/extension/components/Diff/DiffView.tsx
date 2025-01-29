@@ -3,6 +3,7 @@ import { Diff2HtmlConfig, html as diffHtml } from "diff2html";
 import { ColorSchemeType } from "diff2html/lib/types";
 import { modLine } from "../../../models/AnalysisOutput";
 import { insertButtons } from "./InsertButtons";
+import { getClassFromJavaFilename } from "@extension/utils";
 
 const diffConfig: Diff2HtmlConfig = {
   outputFormat: "line-by-line",
@@ -70,6 +71,22 @@ export default function DiffView({ diff, modifiedLines }: DiffViewProps) {
       }
     };
 
+    const addFileNameAsClass = () => {
+      const diffContainer = document.getElementById("diff-container");
+      const diffFiles = diffContainer?.querySelectorAll(".d2h-file-wrapper");
+  
+      if (diffFiles) {
+        diffFiles.forEach((diffFile) => {
+          let fileName = diffFile.querySelector(".d2h-file-name")?.textContent?.trim();
+          
+          if (fileName) {
+            fileName = getClassFromJavaFilename(fileName);  
+            diffFile.classList.add(`${fileName}`);
+          }
+        });
+      }
+    };
+
     //function to showing only context lines
     const collapsedViewed = () => {
       const diffFiles = document.querySelectorAll<HTMLElement>(".d2h-file-wrapper");
@@ -98,6 +115,7 @@ export default function DiffView({ diff, modifiedLines }: DiffViewProps) {
     };
 
     updateDiffColors();
+    addFileNameAsClass();
     collapsedViewed();
   }, [modifiedLines]);
 
