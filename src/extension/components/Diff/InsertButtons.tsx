@@ -1,54 +1,78 @@
+import { getClassFromJavaFilename } from "@extension/utils";
+
 const linesToExpand = 3;
 const buttonLines: { [fileName: string]: { [index: number]: HTMLTableRowElement } } = {};
 const cachedLinesByFile: { [fileName: string]: NodeListOf<HTMLTableRowElement> } = {};
 
+export const firstVisibleLine = (classFileName: string): number => {
+  const lines = cachedLinesByFile[classFileName];
+  for (let index = 0; index < lines.length; index++) {
+    if (!lines[index].classList.contains("d2h-d-none")) {
+      return index; 
+    }
+  }
+
+  return -1;
+};
+
+export const lastVisibleLine = (classFileName: string): number => {
+  const lines = cachedLinesByFile[classFileName];
+  for (let index = lines.length-1; index > 0; index--) {
+    if (!lines[index].classList.contains("d2h-d-none")) {
+      return index; 
+    }
+  }
+
+  return -1;
+};
+
 //function to reveal lines to up
-const expandTop = (diffFile: HTMLElement, lineIndex: number, fileName: string) => {
-  const lines = cachedLinesByFile[fileName];
+export const expandTop = (diffFile: HTMLElement, lineButtonIndex: number, classFileName: string) => {
+  const lines = cachedLinesByFile[classFileName];
   let lastLineBeforeButton = 0;
   let limit = -1;
-  let linesExpandeds = lineIndex - 2 * linesToExpand;
+  let linesExpandeds = lineButtonIndex - 2 * linesToExpand;
 
   lines.forEach((line, index) => {
-    if (!line.classList.contains("d2h-d-none") && index < lineIndex) {
+    if (!line.classList.contains("d2h-d-none") && index < lineButtonIndex) {
       lastLineBeforeButton = index;
     }
   });
 
   if (linesExpandeds <= lastLineBeforeButton + 1) {
     limit = lastLineBeforeButton;
-    buttonLines[fileName][lineIndex].remove();
+    buttonLines[classFileName][lineButtonIndex].remove();
 
     //checking button-down to remove
     if (lastLineBeforeButton != 0) {
-      buttonLines[fileName][limit].remove();
+      buttonLines[classFileName][limit].remove();
     }
   } else {
     limit = linesExpandeds;
 
     //Making a new button
-    buttonLines[fileName][lineIndex].remove();
+    buttonLines[classFileName][lineButtonIndex].remove();
 
-    const newTopButton = createButton("top", diffFile, limit, fileName);
-    insertButtonInCell(lines[limit], newTopButton, "top", limit, fileName);
+    const newTopButton = createButton("top", diffFile, limit, classFileName);
+    insertButtonInCell(lines[limit], newTopButton, "top", limit, classFileName);
   }
 
-  for (let i = lineIndex - 1; i >= limit; i--) {
+  for (let i = lineButtonIndex - 1; i >= limit; i--) {
     lines[i].classList.remove("d2h-d-none");
   }
 };
 
 //function to show lines to down
-const expandBottom = (diffFile: HTMLElement, lineIndex: number, fileName: string) => {
-  const lines = cachedLinesByFile[fileName];
+export const expandBottom = (diffFile: HTMLElement, lineButtonIndex: number, classFileName: string) => {
+  const lines = cachedLinesByFile[classFileName];
   let firstLineAfterButton = -1;
   let limit = -1;
-  let linesExpandeds = lineIndex + 2 * linesToExpand;
+  let linesExpandeds = lineButtonIndex + 2 * linesToExpand;
 
   lines.forEach((line, index) => {
     if (
       !line.classList.contains("d2h-d-none") &&
-      index > lineIndex &&
+      index > lineButtonIndex &&
       firstLineAfterButton == -1 &&
       !line.classList.contains("button-container")
     ) {
@@ -59,36 +83,37 @@ const expandBottom = (diffFile: HTMLElement, lineIndex: number, fileName: string
   if (firstLineAfterButton == -1) {
     if (linesExpandeds >= lines.length) {
       limit = lines.length;
-      buttonLines[fileName][lineIndex].remove();
+      buttonLines[classFileName][lineButtonIndex].remove();
     } else {
       limit = linesExpandeds;
-      buttonLines[fileName][lineIndex].remove();
+      buttonLines[classFileName][lineButtonIndex].remove();
 
-      const newBottomButton = createButton("down", diffFile, limit, fileName);
-      insertButtonInCell(lines[limit], newBottomButton, "bottom", limit, fileName);
+      const newBottomButton = createButton("down", diffFile, limit, classFileName);
+      insertButtonInCell(lines[limit], newBottomButton, "bottom", limit, classFileName);
     }
   } else if (firstLineAfterButton != -1 && linesExpandeds >= firstLineAfterButton - 1) {
     limit = firstLineAfterButton;
-    buttonLines[fileName][lineIndex].remove();
-    buttonLines[fileName][firstLineAfterButton].remove();
+    buttonLines[classFileName][lineButtonIndex].remove();
+    buttonLines[classFileName][firstLineAfterButton].remove();
   } else if ((firstLineAfterButton != -1 && linesExpandeds < firstLineAfterButton) || linesExpandeds < lines.length) {
     limit = linesExpandeds;
 
     //Making a new button
-    buttonLines[fileName][lineIndex].remove();
+    buttonLines[classFileName][lineButtonIndex].remove();
 
-    const newBottomButton = createButton("down", diffFile, limit, fileName);
-    insertButtonInCell(lines[limit], newBottomButton, "bottom", limit, fileName);
+    const newBottomButton = createButton("down", diffFile, limit, classFileName);
+    insertButtonInCell(lines[limit], newBottomButton, "bottom", limit, classFileName);
   }
 
-  for (let i = lineIndex + 1; i <= limit; i++) {
+  for (let i = lineButtonIndex + 1; i <= limit; i++) {
     lines[i].classList.remove("d2h-d-none");
   }
 };
 
 export const insertButtons = (diffFile: HTMLElement, fileName: string) => {
   const lines = diffFile.querySelectorAll("tr");
-  cachedLinesByFile[fileName] = lines;
+  let classFileName = getClassFromJavaFilename(fileName) || "null";
+  cachedLinesByFile[classFileName] = lines;
 
   let firstVisibleIndex = -1;
   let lastVisibleIndex = -1;
@@ -110,8 +135,8 @@ export const insertButtons = (diffFile: HTMLElement, fileName: string) => {
 
         if (firstVisibleIndex > 1) {
           // Insert "expand up" button before the first visible line
-          const topButton = createButton("top", diffFile, index, fileName);
-          insertButtonInCell(line, topButton, "top", index, fileName);
+          const topButton = createButton("top", diffFile, index, classFileName);
+          insertButtonInCell(line, topButton, "top", index, classFileName);
         }
       }
 
@@ -125,12 +150,12 @@ export const insertButtons = (diffFile: HTMLElement, fileName: string) => {
           const currentLastVisibleIndex = lastVisibleIndex;
 
           // Insert "expand bottom" after previous line
-          const bottomButton = createButton("down", diffFile, currentLastVisibleIndex, fileName);
-          insertButtonInCell(lastVisibleLine, bottomButton, "bottom", lastVisibleIndex, fileName);
+          const bottomButton = createButton("down", diffFile, currentLastVisibleIndex, classFileName);
+          insertButtonInCell(lastVisibleLine, bottomButton, "bottom", lastVisibleIndex, classFileName);
 
           // Insert "expand up" before current out-of-order line
-          const newTopButton = createButton("top", diffFile, index, fileName);
-          insertButtonInCell(line, newTopButton, "top", index, fileName);
+          const newTopButton = createButton("top", diffFile, index, classFileName);
+          insertButtonInCell(line, newTopButton, "top", index, classFileName);
         }
       }
 
@@ -142,8 +167,8 @@ export const insertButtons = (diffFile: HTMLElement, fileName: string) => {
 
   // Insert "expand bottom" after the last visible line
   if (lastVisibleIndex !== -1 && lastVisibleIndex != lines.length - 1) {
-    const bottomButton = createButton("down", diffFile, lastVisibleIndex, fileName);
-    insertButtonInCell(lines[lastVisibleIndex], bottomButton, "bottom", lastVisibleIndex, fileName);
+    const bottomButton = createButton("down", diffFile, lastVisibleIndex, classFileName);
+    insertButtonInCell(lines[lastVisibleIndex], bottomButton, "bottom", lastVisibleIndex, classFileName);
   }
 };
 
@@ -152,7 +177,7 @@ const insertButtonInCell = (
   button: HTMLElement,
   position: "top" | "bottom",
   index: number,
-  fileName: string
+  classFileName: string
 ) => {
   const newTr = document.createElement("tr");
   newTr.classList.add("button-container");
@@ -164,11 +189,11 @@ const insertButtonInCell = (
   newTd.appendChild(button);
 
   newTr.appendChild(newTd);
-  if (!buttonLines[fileName]) {
-    buttonLines[fileName] = {};
+  if (!buttonLines[classFileName]) {
+    buttonLines[classFileName] = {};
   }
 
-  buttonLines[fileName][index] = newTr;
+  buttonLines[classFileName][index] = newTr;
 
   if (position == "top") {
     line.parentNode?.insertBefore(newTr, line);
@@ -181,17 +206,17 @@ const insertButtonInCell = (
   }
 };
 
-function createButton(position: "top" | "down", diffFile: HTMLElement, index: number, fileName: string) {
+function createButton(position: "top" | "down", diffFile: HTMLElement, index: number, classFileName: string) {
   const button = document.createElement("button");
   button.classList.add("button-style");
 
   if (position == "top") {
     button.innerHTML = "&#x25B2;";
-    button.onclick = () => expandTop(diffFile, index, fileName);
+    button.onclick = () => expandTop(diffFile, index, classFileName);
     button.title = "Expand Up";
   } else {
     button.innerHTML = "&#x25BC;";
-    button.onclick = () => expandBottom(diffFile, index, fileName);
+    button.onclick = () => expandBottom(diffFile, index, classFileName);
     button.title = "Expand Down";
   }
 

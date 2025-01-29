@@ -14,6 +14,8 @@ import { NodeDisplayData, PartialButFor } from "sigma/types";
 import { Settings } from "sigma/settings";
 import { AnimateOptions } from "sigma/utils";
 import { getDiffLine, scrollAndHighlight } from "../Diff/diff-navigation";
+import { firstVisibleLine, lastVisibleLine } from "../Diff/InsertButtons";
+import { expandTop, expandBottom } from "../Diff/InsertButtons";
 
 const LABEL_Y_OFFSET = 4;
 const HOVER_PADDING = 2;
@@ -212,6 +214,22 @@ const navigateToDiffLine = (node: NodeDisplayData) => {
 
   const [file, line] = node.label.split(":");
   const diffLine = getDiffLine(file.endsWith(".java") ? file : `${file}.java`, Number(line));
+
+  // checking if the diffLine is visible
+  if (diffLine?.classList.contains("d2h-d-none")){
+    let firstLine = firstVisibleLine(file);
+    const diffFile = document.querySelector(`${file}`) as HTMLElement;
+     while (diffLine?.classList.contains("d2h-d-none")) {
+      if (Number(line) > firstLine){
+        let lastLine = lastVisibleLine(file);
+        expandBottom(diffFile, lastLine, file);
+      } else{
+        firstLine = firstVisibleLine(file);
+        expandTop(diffFile, firstLine, file);
+      }
+    }
+  }
+
   scrollAndHighlight(diffLine);
 };
 
