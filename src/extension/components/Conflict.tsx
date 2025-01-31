@@ -42,7 +42,17 @@ export default function Conflict({ index, dependency, setConflict }: ConflictPro
   };
 
   const locationStrings = getLocationStrings(dependency);
+  const maxLength = 25;
+  const minimizedString = (str: string) => str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
 
+  function definingTitle(): string{
+    if (locationStrings.to.length > maxLength || locationStrings.from.length > maxLength){
+      return `${locationStrings.from} → ${locationStrings.to}`;
+    } else{
+      return "";
+    }
+  }
+  
   return (
     <div className="tw-mb-3 tw-cursor-pointer tw-w-fit" onClick={() => setConflict(index)}>
       {dependency.type === "CONFLICT" ? (
@@ -55,8 +65,8 @@ export default function Conflict({ index, dependency, setConflict }: ConflictPro
       </span>
     )}
       
-      <p className="tw-text-gray-400">
-        in {locationStrings.from} &rarr; {locationStrings.to}
+      <p className="tw-text-gray-400" title={definingTitle()}>
+      in {minimizedString(locationStrings.from)} &rarr; {minimizedString(locationStrings.to)}
       </p>
     </div>
   );
