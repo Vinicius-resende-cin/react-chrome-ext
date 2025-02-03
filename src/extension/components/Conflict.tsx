@@ -42,7 +42,7 @@ export default function Conflict({ index, dependency, setConflict }: ConflictPro
   };
 
   const locationStrings = getLocationStrings(dependency);
-  const maxLength = 25;
+  const maxLength = 28;
   const minimizedString = (str: string) => str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
 
   function definingTitle(): string{
