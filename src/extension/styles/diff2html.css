@@ -233,7 +233,7 @@
   -ms-user-select: text;
   user-select: text;
   vertical-align: middle;
-  white-space: pre;
+  white-space: pre-wrap;
   width: 100%;
 }
 .d2h-code-line del,
