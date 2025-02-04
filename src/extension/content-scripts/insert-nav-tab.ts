@@ -1,3 +1,7 @@
+import { analysisAPI } from "../../config";
+import RepoService from "../../services/RepoService";
+const repoService = new RepoService(analysisAPI);
+
 const DEPENDENCIES_URL = `#dependencies`;
 
 /**
@@ -31,6 +35,10 @@ function isOnCommitsTab(url: string) {
   return null;
 }
 
+async function isRepoRegistered(owner: string, repo: string) {
+  return await repoService.isRepoRegistered(owner, repo);
+}
+
 /**
  * Sends a message to the extension to go to the dependencies page.
  */
@@ -50,9 +58,14 @@ async function gotoDependencies() {
 /**
  * Inserts the dependencies tab in the pull request page.
  */
-const insertNavTab = () => {
+const insertNavTab = async () => {
   // check if the url is a github pull request
   if (!isUrlGithubPullRequest(window.location.href)) return;
+
+  // check if the repo is registered
+  const owner = window.location.pathname.split("/")[1];
+  const repo = window.location.pathname.split("/")[2];
+  if (!(await isRepoRegistered(owner, repo))) return;
 
   // get the nav element
   let navElement = document.querySelector("[aria-label='Pull request tabs']");
@@ -80,8 +93,7 @@ const insertNavTab = () => {
 
           // sends a message to the extension when clicked
           tab.addEventListener("click", async () => {
-            if (isAlreadyOnDependenciesUrl(window.location.href) && tab.classList.contains("selected"))
-              return;
+            if (isAlreadyOnDependenciesUrl(window.location.href) && tab.classList.contains("selected")) return;
             await gotoDependencies();
           });
 
@@ -100,8 +112,8 @@ const insertNavTab = () => {
 };
 
 // observer logic (based on https://github.com/Justineo/github-hovercard 's observer logic)
-const observer = new MutationObserver(() => {
-  insertNavTab();
+const observer = new MutationObserver(async () => {
+  await insertNavTab();
 });
 
 /**
