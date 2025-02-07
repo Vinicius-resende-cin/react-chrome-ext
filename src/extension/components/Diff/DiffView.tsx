@@ -5,7 +5,7 @@ import { modLine } from "../../../models/AnalysisOutput";
 import { insertButtons } from "./InsertButtons";
 import { getClassFromJavaFilename } from "@extension/utils";
 
-const isDarkMode = () => {
+export const isDarkMode = () => {
   return document.documentElement.getAttribute("data-color-mode") === "dark";
 };
 
