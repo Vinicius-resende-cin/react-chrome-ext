@@ -63,7 +63,7 @@
   --d2h-dark-change-label-color: #d29922;
   --d2h-dark-moved-label-color: #3572b0;
 }
-.button-container {
+.button-container-light {
   background-color: #f1f8ff;
   display: table-row;
   box-sizing: border-box;
@@ -71,7 +71,7 @@
   unicode-bidi: isolate;
   border-color: inherit;
 }
-.button-style {
+.button-style-light {
   background-color: #a4c8ff;
   width: 7.5em;
   box-sizing: border-box;
@@ -79,10 +79,28 @@
   color: #7a7c80;
   transition: background-color 0.2s ease, color 0.2 ease;
 }
-.button-style:hover {
+.button-style-light:hover,
+.button-style-dark:hover {
   background-color: #0366d6;
   color: #ffffff;
 }
+.button-container-dark {
+  background-color: #0e1e2e;
+  display: table-row;
+  box-sizing: border-box;
+  vertical-align: inherit;
+  unicode-bidi: isolate;
+  border-color: inherit;
+}
+.button-style-dark {
+  background-color: #092e54;
+  width: 7.5em;
+  box-sizing: border-box;
+  border: none;
+  color: #6f7478;
+  transition: background-color 0.2s ease, color 0.2 ease;
+}
+
 .button-cell {
   display: table-cell;
   padding: 0;

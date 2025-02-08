@@ -5,13 +5,17 @@ import { modLine } from "../../../models/AnalysisOutput";
 import { insertButtons } from "./InsertButtons";
 import { getClassFromJavaFilename } from "@extension/utils";
 
+export const isDarkMode = () => {
+  return document.documentElement.getAttribute("data-color-mode") === "dark";
+};
+
 const diffConfig: Diff2HtmlConfig = {
   outputFormat: "line-by-line",
   drawFileList: true,
   renderNothingWhenEmpty: true,
   matching: "words",
   diffStyle: "word",
-  colorScheme: ColorSchemeType.AUTO
+  colorScheme: isDarkMode() ? ColorSchemeType.DARK : ColorSchemeType.LIGHT
 };
 
 interface DiffViewProps {

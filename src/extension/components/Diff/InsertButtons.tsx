@@ -1,4 +1,5 @@
 import { getClassFromJavaFilename } from "@extension/utils";
+import { isDarkMode } from "./DiffView";
 
 const linesToExpand = 3;
 const buttonLines: { [fileName: string]: { [index: number]: HTMLTableRowElement } } = {};
@@ -180,7 +181,12 @@ const insertButtonInCell = (
   classFileName: string
 ) => {
   const newTr = document.createElement("tr");
-  newTr.classList.add("button-container");
+  if (isDarkMode()){
+    newTr.classList.add("button-container-dark");
+  } else{
+    newTr.classList.add("button-container-light");
+  }
+  
 
   const newTd = document.createElement("td");
   newTd.colSpan = line.querySelectorAll("td").length;
@@ -208,7 +214,11 @@ const insertButtonInCell = (
 
 function createButton(position: "top" | "down", diffFile: HTMLElement, index: number, classFileName: string) {
   const button = document.createElement("button");
-  button.classList.add("button-style");
+  if (isDarkMode()){    
+    button.classList.add("button-style-dark");
+  } else{
+    button.classList.add("button-style-light");
+  }
 
   if (position == "top") {
     button.innerHTML = "&#x25B2;";
