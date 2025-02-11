@@ -74,11 +74,12 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({
             <span className="tooltip-container">
               <FontAwesomeIcon icon={faCircleQuestion} className="question-icon" />
               <div className="tooltip">
-                The analysis will search for conflicts in all methods that can be reached from the set method
-                the Main Class. If none is set, the default org.example.Main.main() will be used.
+                The analysis will search for conflicts in all methods that can be reached from the set method from the Main
+                Class. If none is set, the default org.example.Main.main() will be used.
                 <br />
-                Setting this to a method that covers more of the codebase will result in a more comprehensive
-                analysis, but it will also take longer to complete.
+                <br />
+                Setting this to a method that covers more of the codebase will result in a more comprehensive analysis, but
+                it will also take longer to complete.
               </div>
             </span>
             <input
@@ -114,11 +115,11 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({
             <span className="tooltip-container">
               <FontAwesomeIcon icon={faCircleQuestion} className="question-icon" />
               <div className="tooltip">
-                Only conflicts in methods that can be reached from the base class will be reported. If a
-                conflict outside of this scope exists, it will be ignored.
+                Only conflicts in methods that can be reached from the base class will be reported. If a conflict outside of
+                this scope exists, it will be ignored.
                 <br />
-                Defining a base class can help to guide the analysis to the most relevant parts of the
-                codebase.
+                <br />
+                Defining a base class can help to guide the analysis to the most relevant parts of the codebase.
               </div>
             </span>
             <input
