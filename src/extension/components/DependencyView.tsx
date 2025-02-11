@@ -46,6 +46,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [diff, setDiff] = useState<string>("");
   const [graphData, setGraphData] = useState<Partial<SerializedGraph> | null>(null);
+  const [mainClass, setMainClass] = useState("");
   const [baseClass, setBaseClass] = useState("");
   const [mainMethod, setMainMethod] = useState("");
 
@@ -88,7 +89,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
     if (getClassFromJavaFilename(R.file) === getClassFromJavaFilename(RC.file) && R.line === RC.line) {
       R.file =
-        dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.class.replaceAll(".", "/") ?? R.file;
+        dep.body.interference[dep.body.interference.length - 1].stackTrace
+          ?.at(0)
+          ?.class.replaceAll(".", "/") ?? R.file;
       R.line = dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.line ?? R.line;
     }
 
@@ -154,7 +157,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let R: lineData = {
       file: fileTo,
       line: lineTo.location.line,
-      method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ?? lineTo.location.method
+      method:
+        dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ??
+        lineTo.location.method
     };
     updateGraph(dep, L, R);
   };
@@ -193,8 +198,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
     // get the settings
     getSettings(owner, repository, pull_number).then((response) => {
-      setBaseClass(response.baseClass);
+      setMainClass(response.mainClass);
       setMainMethod(response.mainMethod);
+      setBaseClass(response.baseClass ?? "");
     });
   }, [owner, repository, pull_number]);
 
@@ -212,6 +218,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         <SettingsButton
           baseClass={baseClass}
           setBaseClass={setBaseClass}
+          mainClass={mainClass}
+          setMainClass={setMainClass}
           mainMethod={mainMethod}
           setMainMethod={setMainMethod}
         />
