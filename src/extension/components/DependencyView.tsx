@@ -49,6 +49,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [mainClass, setMainClass] = useState("");
   const [baseClass, setBaseClass] = useState("");
   const [mainMethod, setMainMethod] = useState("");
+  const [loading, setloading] = useState<boolean>(true);
 
   /*
    * page properties
@@ -167,6 +168,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   // get the analysis output
   useEffect(() => {
     getAnalysisOutput(owner, repository, pull_number).then((response) => {
+      setloading(false);
       dependencyViewConfig = { owner, repository, pull_number };
       let dependencies = response.getDependencies();
       dependencies.forEach((dep) => {
@@ -214,16 +216,23 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   return (
     <div id="dependency-plugin">
-      {diff ? (
-        <SettingsButton
-          baseClass={baseClass}
-          setBaseClass={setBaseClass}
-          mainClass={mainClass}
-          setMainClass={setMainClass}
-          mainMethod={mainMethod}
-          setMainMethod={setMainMethod}
-        />
-      ) : null}
+      {loading ? (
+        <div className="loading-container">
+          <div className="spinner"></div> {/* Exibindo o spinner enquanto carrega */}
+          <p>Loading analysis...</p>
+        </div>
+      ) : (
+        <>
+        {diff ? (
+          <SettingsButton
+            baseClass={baseClass}
+            setBaseClass={setBaseClass}
+            mainClass={mainClass}
+            setMainClass={setMainClass}
+            mainMethod={mainMethod}
+            setMainMethod={setMainMethod}
+          />
+        ) : null}
       <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
         {dependencies.length ? (
           <div
@@ -261,6 +270,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
