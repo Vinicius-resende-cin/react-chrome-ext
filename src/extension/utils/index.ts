@@ -10,8 +10,8 @@ const getClassFromJavaFilename = (filename: string): string | undefined => {
 };
 
 const getMethodNameFromJavaMethod = (methodName: string): string | undefined => {
-  const result = methodName.split(" ").pop()?.replace(">", "");
-  return result?.endsWith("()") ? result : `${result}()`;
+  const result = methodName.split(" ").pop()?.replace(">", "").trim();
+  return result?.endsWith(")") ? result : `${result}()`;
 };
 
 const isLineFromLeft = (lines: lineData[], modlines: modLine[]): boolean => {

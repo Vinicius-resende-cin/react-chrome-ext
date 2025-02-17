@@ -17,7 +17,8 @@
     "jsx": "react-jsx",
     "baseUrl": "./src",
     "paths": {
-      "@extension/*": ["extension/*"]
+      "@extension/*": ["extension/*"],
+      "@src/*": ["./*"]
     }
   },
   "include": ["src/**/*", "tests/**/*.ts"]

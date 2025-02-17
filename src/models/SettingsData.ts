@@ -1,26 +1,29 @@
-interface IASettingsData {
+export interface ISettingsData {
   uuid: string;
   repository: string;
   owner: string;
   pull_number: number;
-  baseClass: string;
+  mainClass: string;
   mainMethod: string;
+  baseClass?: string;
 }
 
-export default class SettingsData implements IASettingsData {
+export default class SettingsData implements ISettingsData {
   uuid: string;
   repository: string;
   owner: string;
   pull_number: number;
-  baseClass: string;
+  mainClass: string;
   mainMethod: string;
+  baseClass?: string;
 
-  constructor(settings: IASettingsData) {
+  constructor(settings: ISettingsData) {
     this.uuid = settings.uuid;
     this.repository = settings.repository;
     this.owner = settings.owner;
     this.pull_number = settings.pull_number;
-    this.baseClass = settings.baseClass;
+    this.mainClass = settings.mainClass;
     this.mainMethod = settings.mainMethod;
+    this.baseClass = settings.baseClass;
   }
 }
