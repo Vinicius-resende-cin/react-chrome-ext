@@ -1,11 +1,11 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
 import path from 'path';
-import { getDiffLine, highlight } from '../src/extension/components/Diff/diff-navigation';
+import { getDiffLine, highlight, scrollAndHighlight } from '../src/extension/components/Diff/diff-navigation';
 
 const EXTENSION_PATH = path.resolve('dist');
 const TEST_URL = `https://github.com/Vinicius-resende-cin/semantic-conflict/pull/192`;
-const FILE_TEST = 'DFPBaseSample.java';
-const LINE_TEST = 11;
+const FILE_TEST = 'RightAssignment.java';
+const LINE_TEST = 5;
 
 let browser: Browser;
 let page: Page;
@@ -90,43 +90,54 @@ test('checking if the graph is builded', async () => {
 }, 30000);
 
 test('checking if the click on node works correctly', async () => {
-  const diffLineId = await page.evaluate((file, line) => {
-    const diffLine = getDiffLine(file, line);
-    return diffLine ? diffLine.id : null; 
-  }, FILE_TEST, LINE_TEST);
+  const initialScrollPosition = await page.evaluate(() => document.documentElement.scrollTop);
+  await page.evaluate((file, line) => {
 
-  expect(diffLineId).not.toBeNull(); 
-  if (!diffLineId) {
-    throw new Error("Failed to find diff line");
-  }
-  await page.evaluate((diffLineId) => {
-    const lineElement = document.getElementById(diffLineId);
-    if (lineElement) {
-      lineElement.scrollIntoView();
-      highlight(lineElement);
-      lineElement.classList.add("pl-line-highlight");
-    }
-  }, diffLineId);
-  const isHighlighted = await page.evaluate(() => {
-    return !!document.querySelector('tr.pl-line-highlight');
-  });
-  expect(isHighlighted).toBe(true);
+    const diffContainer = document.getElementById("diff-container");
+    const diffFiles = diffContainer?.querySelectorAll(".d2h-file-wrapper");
+    if (!diffContainer || !diffFiles) throw new Error("Diff not found");
 
-  // const DiffLine = page.evaluate(() => { return getDiffLine(FILE_TEST, LINE_TEST) })
+    // get the diff element of the file
+    const diffContent = Array.from(diffFiles).filter((diffFile) => {
+      const fileName = diffFile.querySelector(".d2h-file-name")?.textContent;
+      console.log(fileName);
+      return fileName?.endsWith(file);
+    })[0];
+    if (!diffContent) throw new Error(`Diff not found for file ${file}`);
+
+    // get the line element
+    const allLines = diffContent.querySelectorAll(`tr`);
+
+    let lineElement = Array.from(allLines).filter((l) => {
+      const lineNumber = l.querySelector(".line-num2")?.textContent;
+      return lineNumber === line.toString();
+    })[0];
+    if (!lineElement) throw new Error(`Line ${line} not found in file ${file}`);
+    // set the id and return
+    lineElement.id = `${file}:${line}`;    
+
+    lineElement.classList.add("pl-line-highlight");
+
+    // add the fade out effect
+    lineElement.addEventListener(
+      "mouseover",
+      () => {
+        lineElement.classList.add("pl-fadeout-border");
+      },
+      { once: true }
+    );
   
-  // expect(DiffLine).not.toBeNull();
+    // remove the highlight class after the fade out effect
+    lineElement.addEventListener("animationend", (event) => {
+      if (event.animationName === "fadeOutBorder") {
+        lineElement.classList.remove("pl-line-highlight");
+        lineElement.classList.remove("pl-fadeout-border");
+      }
+    });
 
-  // await page.evaluate((lineElement) => {
-  //   if (lineElement) {
-  //     scrollAndHighlight(lineElement);
-  //     lineElement.classList.add("pl-line-highlight");
-  //   }
-  // }, DiffLine);
-
-  // const isHighlighted = await page.evaluate(() => {
-  //   return !!document.querySelector('tr.pl-line-highlight');
-  // });
-
-  // expect(isHighlighted).toBe(true);
+    lineElement.scrollIntoView({ block: "center" });
+ 
+  }, FILE_TEST, LINE_TEST);
+  const finalScrollPosition = await page.evaluate(() => document.documentElement.scrollTop);
+  expect(finalScrollPosition).not.toBe(initialScrollPosition);
 }, 30000);
-
