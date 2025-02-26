@@ -59,18 +59,38 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   /*
    * methods
    */
-  const updateGraph = (dep: dependency, L: lineData, R: lineData) => {
+  const updateGraph = (dep: dependency, L: lineData, R: lineData, TRG?: lineData) => {
     let newGraphData;
 
     // get the LC and RC
     dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
 
     // get the filename and line numbers of the conflict
-    let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
-    let lineFrom = dep.body.interference[0]; // first line
-    let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
-    let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+    let fileFrom; 
+    let lineFrom;
+    let fileTo;
+    let lineTo;
+    let targFilename = "";
+    let targLine;
 
+    if (dep.type.startsWith("CONFLUENCE")){
+
+      fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // filename source 1
+      lineFrom = dep.body.interference[0]; // line source 1
+      fileTo = dep.body.interference[1].location.file.replaceAll("\\", "/"); // filename source 2
+      lineTo = dep.body.interference[1]; // line source 2
+      targFilename = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // filename targ
+      targLine = dep.body.interference[dep.body.interference.length - 1]; // line targ
+
+    } else {
+
+      fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
+      lineFrom = dep.body.interference[0]; // first line
+      fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
+      lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+
+    }
+    
     const LC = {
       file: fileFrom,
       line: lineFrom.location.line,
@@ -128,8 +148,17 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       newGraphData = generateGraphData("df", { L, R, LC, RC }, lColor, rColor, {
         variables: { left: variables[0], right: variables[1] }
       });
+    } else if (dep.type.startsWith("CONFLUENCE")){
+      if (targLine) {
+        TRG = {
+          file: targFilename,
+          line: targLine.location.line,
+          method: targLine.location.method
+        };
+        newGraphData = generateGraphData("cf", {L, R, LC, RC, TRG}, lColor, rColor);
+      }  
     }
-
+    console.log(newGraphData);
     // set the new graph data
     if (!newGraphData) setGraphData(null);
     else setGraphData(newGraphData);
@@ -137,10 +166,27 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   const changeActiveConflict = (dep: dependency) => {
     // get the filename and line numbers of the conflict
-    let fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
-    let lineFrom = dep.body.interference[0]; // first line
-    let fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
-    let lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+    let fileFrom;
+    let lineFrom;
+    let fileTo;
+    let lineTo;
+    let trgLine;
+    let trgFileName = "";
+
+    if (dep.type.startsWith("CONFLUENCE")){
+      fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
+      lineFrom = dep.body.interference[0]; // first line
+      fileTo = dep.body.interference[1].location.file.replaceAll("\\", "/"); // last filename
+      lineTo = dep.body.interference[1]; // last line
+      trgLine = dep.body.interference[dep.body.interference.length - 1]; 
+      trgFileName = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
+
+    } else {
+      fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
+      lineFrom = dep.body.interference[0]; // first line
+      fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
+      lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
+    }
 
     // if the filename is unknown, try to get the first valid one from the stack trace
     if (fileFrom === "UNKNOWN" || fileTo === "UNKNOWN") {
@@ -150,19 +196,44 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     // declare the graph data variables
-    let L: lineData = {
-      file: fileFrom,
-      line: lineFrom.location.line,
-      method: dep.body.interference[0].stackTrace?.at(0)?.method ?? lineFrom.location.method
-    };
-    let R: lineData = {
-      file: fileTo,
-      line: lineTo.location.line,
-      method:
-        dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ??
-        lineTo.location.method
-    };
-    updateGraph(dep, L, R);
+    if ( dep.type.startsWith("CONFLUENCE") && trgLine){
+      let L: lineData = {
+        file: fileFrom,
+        line: lineFrom.location.line,
+        method: dep.body.interference[0].stackTrace?.at(0)?.method ?? lineFrom.location.method
+      };
+      let R: lineData = {
+        file: fileTo,
+        line: lineTo.location.line,
+        method:
+          dep.body.interference[1].stackTrace?.at(0)?.method ??
+          lineTo.location.method
+      };
+      let TRG: lineData = {
+        file: trgFileName,
+        line: trgLine.location.line,
+        method:
+          dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ??
+          lineTo.location.method
+      } 
+      updateGraph(dep, L, R, TRG);
+
+    } else {
+      let L: lineData = {
+        file: fileFrom,
+        line: lineFrom.location.line,
+        method: dep.body.interference[0].stackTrace?.at(0)?.method ?? lineFrom.location.method
+      };
+      let R: lineData = {
+        file: fileTo,
+        line: lineTo.location.line,
+        method:
+          dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ??
+          lineTo.location.method
+      };
+      updateGraph(dep, L, R);
+    }
+    
   };
 
   // get the analysis output
