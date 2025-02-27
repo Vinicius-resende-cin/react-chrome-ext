@@ -6,6 +6,7 @@ const EDGE_SIZE = 4;
 const EDGE_COLOR_CALL = "#000000";
 const EDGE_COLOR_PRECEDES = "#FACC4F";
 const EDGE_COLOR_CF = "#4F80FA";
+const TRG_CF_COLOR = "#808080";
 
 type lineData = {
   file: string;
@@ -121,11 +122,11 @@ const cfGraphDataFiveNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
       key: "4",
       attributes: {
         x: 2,
-        y: -1,
+        y: -0.5,
         label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
         method: `${getMethodNameFromJavaMethod(TRG.method)}`,
         size: NODE_SIZE,
-        color: blue,
+        color: TRG_CF_COLOR,
         labelPosition: "right"
       }
     }
@@ -193,7 +194,7 @@ const cfGraphDataFiveNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
       }
     }
   ];
-  console.log("estou aqui");
+
   return { nodes, edges };
 };
 
@@ -231,7 +232,7 @@ const cfGraphDataThreeNodes = (L: lineData, R: lineData, TRG: lineData, lColor: 
         label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
         method: `${getMethodNameFromJavaMethod(TRG.method)}`,
         size: NODE_SIZE,
-        color: blue,
+        color: TRG_CF_COLOR,
         labelPosition: "right"
       }
     }
@@ -309,7 +310,7 @@ const cfGraphDataFourNodesRC = (L: lineData, R: lineData, RC: lineData, TRG: lin
         label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
         method: `${getMethodNameFromJavaMethod(TRG.method)}`,
         size: NODE_SIZE,
-        color: blue,
+        color: TRG_CF_COLOR,
         labelPosition: "right"
       }
     }
@@ -417,7 +418,7 @@ const cfGraphDataFourNodesLC = (L: lineData, R: lineData, LC: lineData, TRG: lin
         label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
         method: `${getMethodNameFromJavaMethod(TRG.method)}`,
         size: NODE_SIZE,
-        color: blue,
+        color: TRG_CF_COLOR,
         labelPosition: "right"
       }
     }
