@@ -1,3 +1,7 @@
+#dependency-plugin {
+  position: relative; /* Define um referencial fixo para os elementos filhos */
+}
+
 .dropdown-settings {
   position: absolute;
   min-width: fit-content;
@@ -28,10 +32,11 @@
   justify-content: center;
   align-items: center;
   flex-direction: column; /* Para alinhar o texto abaixo do spinner */
-  top: 48%;
+  top: 50%;
   left: 50%;
-  transform: translate(-48%, -50%);
+  transform: translate(-50%, -50%);
   position: absolute;
+  margin-top: 32px;
 }
 
 .pl-conflict-line {
