@@ -49,6 +49,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [mainClass, setMainClass] = useState("");
   const [baseClass, setBaseClass] = useState("");
   const [mainMethod, setMainMethod] = useState("");
+  const [loading, setloading] = useState<boolean>(true);
 
   /*
    * page properties
@@ -166,42 +167,49 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   // get the analysis output
   useEffect(() => {
-    getAnalysisOutput(owner, repository, pull_number).then((response) => {
-      dependencyViewConfig = { owner, repository, pull_number };
-      let dependencies = response.getDependencies();
-      dependencies.forEach((dep) => {
-        if (
-          dep.body.interference[0].location.file === "UNKNOWN" ||
-          dep.body.interference[dep.body.interference.length - 1].location.file === "UNKNOWN"
-        )
-          updateLocationFromStackTrace(dep, { inplace: true });
+
+    const fetchAnalysis = () => {
+      getAnalysisOutput(owner, repository, pull_number).then((response) => {
+        setloading(false);
+        dependencyViewConfig = { owner, repository, pull_number };
+        let dependencies = response.getDependencies();
+        dependencies.forEach((dep) => {
+          if (
+            dep.body.interference[0].location.file === "UNKNOWN" ||
+            dep.body.interference[dep.body.interference.length - 1].location.file === "UNKNOWN"
+          )
+            updateLocationFromStackTrace(dep, { inplace: true });
+        });
+        dependencies = filterDuplicatedDependencies(dependencies);
+
+        setDependencies(
+          dependencies.sort((a, b) => {
+            const aStartLine = a.body.interference[0].location.line;
+            const bStartLine = b.body.interference[0].location.line;
+            const aEndLine = a.body.interference[a.body.interference.length - 1].location.line;
+            const bEndLine = b.body.interference[b.body.interference.length - 1].location.line;
+
+            if (aStartLine < bStartLine) return -1;
+            if (aStartLine > bStartLine) return 1;
+            if (aEndLine < bEndLine) return -1;
+            if (aEndLine > bEndLine) return 1;
+            return 0;
+          })
+        );
+        setDiff(response.getDiff());
+        setModifiedLines(response.data.modifiedLines ?? []);
       });
-      dependencies = filterDuplicatedDependencies(dependencies);
+  };
 
-      setDependencies(
-        dependencies.sort((a, b) => {
-          const aStartLine = a.body.interference[0].location.line;
-          const bStartLine = b.body.interference[0].location.line;
-          const aEndLine = a.body.interference[a.body.interference.length - 1].location.line;
-          const bEndLine = b.body.interference[b.body.interference.length - 1].location.line;
-
-          if (aStartLine < bStartLine) return -1;
-          if (aStartLine > bStartLine) return 1;
-          if (aEndLine < bEndLine) return -1;
-          if (aEndLine > bEndLine) return 1;
-          return 0;
-        })
-      );
-      setDiff(response.getDiff());
-      setModifiedLines(response.data.modifiedLines ?? []);
-    });
-
+    fetchAnalysis();
+    const intervalId = setInterval(fetchAnalysis, 30000); 
     // get the settings
     getSettings(owner, repository, pull_number).then((response) => {
       setMainClass(response.mainClass);
       setMainMethod(response.mainMethod);
       setBaseClass(response.baseClass ?? "");
     });
+    return () => clearInterval(intervalId);
   }, [owner, repository, pull_number]);
 
   // update the active conflict
@@ -214,16 +222,23 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
   return (
     <div id="dependency-plugin">
-      {diff ? (
-        <SettingsButton
-          baseClass={baseClass}
-          setBaseClass={setBaseClass}
-          mainClass={mainClass}
-          setMainClass={setMainClass}
-          mainMethod={mainMethod}
-          setMainMethod={setMainMethod}
-        />
-      ) : null}
+      {loading ? (
+        <div className="loading-container">
+          <div className="spinner"></div> {/* Exibindo o spinner enquanto carrega */}
+          <p>Loading analysis...</p>
+        </div>
+      ) : (
+        <>
+        {diff ? (
+          <SettingsButton
+            baseClass={baseClass}
+            setBaseClass={setBaseClass}
+            mainClass={mainClass}
+            setMainClass={setMainClass}
+            mainMethod={mainMethod}
+            setMainMethod={setMainMethod}
+          />
+        ) : null}
       <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
         {dependencies.length ? (
           <div
@@ -261,6 +276,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
