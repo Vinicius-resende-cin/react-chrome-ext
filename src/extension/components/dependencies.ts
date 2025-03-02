@@ -6,6 +6,7 @@ const filterDuplicatedDependencies = (dependencies: dependency[]) => {
     if (
       !uniqueDependencies.some(
         (d) =>
+          d.type === dep.type &&
           d.body.interference[0].location.file === dep.body.interference[0].location.file &&
           d.body.interference[0].location.line === dep.body.interference[0].location.line &&
           d.body.interference[d.body.interference.length - 1].location.file ===
