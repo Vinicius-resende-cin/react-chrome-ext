@@ -119,10 +119,13 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
     if (getClassFromJavaFilename(R.file) === getClassFromJavaFilename(RC.file) && R.line === RC.line) {
       R.file =
-        dep.body.interference[dep.body.interference.length - 1].stackTrace
-          ?.at(0)
-          ?.class.replaceAll(".", "/") ?? R.file;
-      R.line = dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.line ?? R.line;
+        (dep.type.startsWith("CONFLUENCE")
+          ? dep.body.interference[1].stackTrace?.at(0)?.class.replaceAll(".", "/")
+          : dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.class.replaceAll(".", "/")) ?? R.file;
+      R.line =
+        (dep.type.startsWith("CONFLUENCE")
+          ? dep.body.interference[1].stackTrace?.at(0)?.line
+          : dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.line) ?? R.line;
     }
 
     //Sending the correct colors to the nodes
@@ -210,7 +213,9 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     if (fileFrom === "UNKNOWN" || fileTo === "UNKNOWN") {
       updateLocationFromStackTrace(dep, { inplace: true });
       fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/");
-      fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/");
+      fileTo = dep.type.startsWith("CONFLUENCE")
+        ? dep.body.interference[1].location.file.replaceAll("\\", "/")
+        : dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/");
     }
 
     // declare the graph data variables
