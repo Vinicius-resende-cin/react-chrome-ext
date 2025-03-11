@@ -249,6 +249,16 @@ const cfGraphDataThreeNodes = (L: lineData, R: lineData, CF: lineData, lColor: s
       }
     },
     {
+      source: "0",
+      target: "2",
+      attributes: {
+        color: EDGE_COLOR_CF,
+        size: EDGE_SIZE,
+        type: "arrow",
+        label: "CF"
+      }
+    },
+    {
         source: "1",
         target: "2",
         attributes: {
