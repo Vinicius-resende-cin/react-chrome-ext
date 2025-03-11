@@ -76,7 +76,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     if (dep.type.startsWith("CONFLUENCE")){
 
       let sourceOne = dep.body.interference.find(el => el.type == "source1");
-      let sourceTwo = dep.body.interference.find(el => el.type == "source1");
+      let sourceTwo = dep.body.interference.find(el => el.type == "source2");
       let confluence = dep.body.interference.find(el => el.type == "confluence");
 
       if (!sourceOne || !sourceTwo || !confluence) {
@@ -184,11 +184,11 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
     if (dep.type.startsWith("CONFLUENCE")){
       let sourceOne = dep.body.interference.find(el => el.type == "source1");
-      let sourceTwo = dep.body.interference.find(el => el.type == "source1");
+      let sourceTwo = dep.body.interference.find(el => el.type == "source2");
       let confluence = dep.body.interference.find(el => el.type == "confluence");
 
       if (!sourceOne || !sourceTwo || !confluence) {
-        console.error("Erroe: Any interference of 'source' or 'confluence' type was founded");
+        console.error("Error: Any interference of 'source' or 'confluence' type was founded");
         return;
       }
 
