@@ -280,7 +280,6 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
     loadGraph(graph);
     resetCamera();
   }, [data, loadGraph, resetCamera]);
-  console.log("procurando problema")
   return null;
 };
 
