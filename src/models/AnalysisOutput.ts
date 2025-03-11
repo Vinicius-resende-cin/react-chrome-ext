@@ -5,6 +5,11 @@ type interferenceTypeList = {
     DECLARATION: "declaration";
     OVERRIDE: "override";
   };
+  CONFLUENCE: {
+    SOURCE1: "source1";
+    SOURCE2: "source2";
+    CONFLUENCE: "confluence";
+  };
   DEFAULT: {
     SOURCE: "source";
     SINK: "sink";
@@ -32,6 +37,11 @@ export const interferenceTypes: interferenceTypeList = {
   OA: {
     DECLARATION: "declaration",
     OVERRIDE: "override"
+  },
+  CONFLUENCE: {
+    SOURCE1: "source1",
+    SOURCE2: "source2",
+    CONFLUENCE: "confluence"
   },
   DEFAULT: {
     SOURCE: "source",

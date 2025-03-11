@@ -59,7 +59,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   /*
    * methods
    */
-  const updateGraph = (dep: dependency, L: lineData, R: lineData, TRG?: lineData) => {
+  const updateGraph = (dep: dependency, L: lineData, R: lineData, CF?: lineData) => {
     let newGraphData;
 
     // get the LC and RC
@@ -70,17 +70,26 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let lineFrom;
     let fileTo;
     let lineTo;
-    let targFilename = "";
-    let targLine;
+    let cfFilename = "";
+    let cfLine;
 
     if (dep.type.startsWith("CONFLUENCE")){
 
-      fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // filename source 1
-      lineFrom = dep.body.interference[0]; // line source 1
-      fileTo = dep.body.interference[1].location.file.replaceAll("\\", "/"); // filename source 2
-      lineTo = dep.body.interference[1]; // line source 2
-      targFilename = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // filename targ
-      targLine = dep.body.interference[dep.body.interference.length - 1]; // line targ
+      let sourceOne = dep.body.interference.find(el => el.type == "source1");
+      let sourceTwo = dep.body.interference.find(el => el.type == "source1");
+      let confluence = dep.body.interference.find(el => el.type == "confluence");
+
+      if (!sourceOne || !sourceTwo || !confluence) {
+        console.error("Erroe: Any interference of 'source' or 'confluence' type was founded");
+        return;
+      }
+
+      fileFrom = sourceOne.location.file.replaceAll("\\", "/"); // filename source 1
+      lineFrom = sourceOne; // line source 1
+      fileTo = sourceTwo.location.file.replaceAll("\\", "/"); // filename source 2
+      lineTo = sourceTwo; // line source 2
+      cfFilename = confluence.location.file.replaceAll("\\", "/"); // filename targ
+      cfLine = confluence; // line targ
 
     } else {
 
@@ -149,16 +158,16 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         variables: { left: variables[0], right: variables[1] }
       });
     } else if (dep.type.startsWith("CONFLUENCE")){
-      if (targLine) {
-        TRG = {
-          file: targFilename,
-          line: targLine.location.line,
-          method: targLine.location.method
+      if (cfLine) {
+        CF = {
+          file: cfFilename,
+          line: cfLine.location.line,
+          method: cfLine.location.method
         };
-        newGraphData = generateGraphData("cf", {L, R, LC, RC, TRG}, lColor, rColor);
+        newGraphData = generateGraphData("cf", {L, R, LC, RC, CF}, lColor, rColor);
       }  
     }
-    console.log(newGraphData);
+
     // set the new graph data
     if (!newGraphData) setGraphData(null);
     else setGraphData(newGraphData);
@@ -170,16 +179,25 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let lineFrom;
     let fileTo;
     let lineTo;
-    let trgLine;
-    let trgFileName = "";
+    let cfLine;
+    let cfFileName = "";
 
     if (dep.type.startsWith("CONFLUENCE")){
-      fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
-      lineFrom = dep.body.interference[0]; // first line
-      fileTo = dep.body.interference[1].location.file.replaceAll("\\", "/"); // last filename
-      lineTo = dep.body.interference[1]; // last line
-      trgLine = dep.body.interference[dep.body.interference.length - 1]; 
-      trgFileName = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
+      let sourceOne = dep.body.interference.find(el => el.type == "source1");
+      let sourceTwo = dep.body.interference.find(el => el.type == "source1");
+      let confluence = dep.body.interference.find(el => el.type == "confluence");
+
+      if (!sourceOne || !sourceTwo || !confluence) {
+        console.error("Erroe: Any interference of 'source' or 'confluence' type was founded");
+        return;
+      }
+
+      fileFrom = sourceOne.location.file.replaceAll("\\", "/"); // source1 filename
+      lineFrom = sourceOne; // source1 line
+      fileTo = sourceTwo.location.file.replaceAll("\\", "/"); // source2 filename
+      lineTo = sourceTwo; // source2 line
+      cfLine = confluence; 
+      cfFileName = confluence.location.file.replaceAll("\\", "/"); // confluence filename
 
     } else {
       fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
@@ -196,7 +214,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     // declare the graph data variables
-    if ( dep.type.startsWith("CONFLUENCE") && trgLine){
+    if ( dep.type.startsWith("CONFLUENCE") && cfLine){
       let L: lineData = {
         file: fileFrom,
         line: lineFrom.location.line,
@@ -209,14 +227,14 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
           dep.body.interference[1].stackTrace?.at(0)?.method ??
           lineTo.location.method
       };
-      let TRG: lineData = {
-        file: trgFileName,
-        line: trgLine.location.line,
+      let CF: lineData = {
+        file: cfFileName,
+        line: cfLine.location.line,
         method:
-          dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ??
+          cfLine.stackTrace?.at(0)?.method ??
           lineTo.location.method
       } 
-      updateGraph(dep, L, R, TRG);
+      updateGraph(dep, L, R, CF);
 
     } else {
       let L: lineData = {

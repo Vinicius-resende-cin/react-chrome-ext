@@ -1,12 +1,11 @@
 import { getClassFromJavaFilename, getMethodNameFromJavaMethod } from "@extension/utils";
-import { blue } from "@mui/material/colors";
 
 const NODE_SIZE = 15;
 const EDGE_SIZE = 4;
 const EDGE_COLOR_CALL = "#000000";
 const EDGE_COLOR_PRECEDES = "#FACC4F";
 const EDGE_COLOR_CF = "#4F80FA";
-const TRG_CF_COLOR = "#808080";
+const CF_COLOR = "#808080";
 
 type lineData = {
   file: string;
@@ -34,7 +33,7 @@ const generateCFGraphData = (
   R: lineData,
   LC: lineData,
   RC: lineData,
-  TRG: lineData,
+  CF: lineData,
   lColor: string,
   rColor: string,
   variables?: { left: string; right: string }
@@ -42,14 +41,14 @@ const generateCFGraphData = (
   let graphData;
   if (`${getClassFromJavaFilename(L.file)}:${L.line}` === `${getClassFromJavaFilename(LC.file)}:${LC.line}`) {
     if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-      graphData = cfGraphDataThreeNodes(L, R, TRG, lColor, rColor);
+      graphData = cfGraphDataThreeNodes(L, R, CF, lColor, rColor);
     } else {
-      graphData = cfGraphDataFourNodesRC(L, R, RC, TRG, lColor, rColor);
+      graphData = cfGraphDataFourNodesRC(L, R, RC, CF, lColor, rColor);
     }
   } else if (`${getClassFromJavaFilename(R.file)}:${R.line}` === `${getClassFromJavaFilename(RC.file)}:${RC.line}`) {
-    graphData = cfGraphDataFourNodesLC(L, R, LC, TRG, lColor, rColor);
+    graphData = cfGraphDataFourNodesLC(L, R, LC, CF, lColor, rColor);
   } else {
-    graphData = cfGraphDataFiveNodes(L, R, LC, RC, TRG, lColor, rColor);
+    graphData = cfGraphDataFiveNodes(L, R, LC, RC, CF, lColor, rColor);
   }
 
   return variables ? insertVariableInformation(graphData.nodes, graphData.edges, variables) : graphData;
@@ -68,7 +67,7 @@ const insertVariableInformation = (nodes: any[], edges: any[], variables: { left
   return { nodes, edges };
 };
 
-const cfGraphDataFiveNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData, TRG: lineData, lColor: string, rColor: string) => {
+const cfGraphDataFiveNodes = (L: lineData, R: lineData, LC: lineData, RC: lineData, CF: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -123,10 +122,10 @@ const cfGraphDataFiveNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
       attributes: {
         x: 2,
         y: -0.5,
-        label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
-        method: `${getMethodNameFromJavaMethod(TRG.method)}`,
+        label: `${getClassFromJavaFilename(CF.file)}:${CF.line}`,
+        method: `${getMethodNameFromJavaMethod(CF.method)}`,
         size: NODE_SIZE,
-        color: TRG_CF_COLOR,
+        color: CF_COLOR,
         labelPosition: "right"
       }
     }
@@ -198,7 +197,7 @@ const cfGraphDataFiveNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
   return { nodes, edges };
 };
 
-const cfGraphDataThreeNodes = (L: lineData, R: lineData, TRG: lineData, lColor: string, rColor: string) => {
+const cfGraphDataThreeNodes = (L: lineData, R: lineData, CF: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -229,10 +228,10 @@ const cfGraphDataThreeNodes = (L: lineData, R: lineData, TRG: lineData, lColor: 
       attributes: {
         x: 1,
         y: -0.5,
-        label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
-        method: `${getMethodNameFromJavaMethod(TRG.method)}`,
+        label: `${getClassFromJavaFilename(CF.file)}:${CF.line}`,
+        method: `${getMethodNameFromJavaMethod(CF.method)}`,
         size: NODE_SIZE,
-        color: TRG_CF_COLOR,
+        color: CF_COLOR,
         labelPosition: "right"
       }
     }
@@ -264,7 +263,7 @@ const cfGraphDataThreeNodes = (L: lineData, R: lineData, TRG: lineData, lColor: 
   return { nodes, edges };
 };
 
-const cfGraphDataFourNodesRC = (L: lineData, R: lineData, RC: lineData, TRG: lineData, lColor: string, rColor: string) => {
+const cfGraphDataFourNodesRC = (L: lineData, R: lineData, RC: lineData, CF: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -307,10 +306,10 @@ const cfGraphDataFourNodesRC = (L: lineData, R: lineData, RC: lineData, TRG: lin
       attributes: {
         x: 2,
         y: -0.5,
-        label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
-        method: `${getMethodNameFromJavaMethod(TRG.method)}`,
+        label: `${getClassFromJavaFilename(CF.file)}:${CF.line}`,
+        method: `${getMethodNameFromJavaMethod(CF.method)}`,
         size: NODE_SIZE,
-        color: TRG_CF_COLOR,
+        color: CF_COLOR,
         labelPosition: "right"
       }
     }
@@ -372,7 +371,7 @@ const cfGraphDataFourNodesRC = (L: lineData, R: lineData, RC: lineData, TRG: lin
   return { nodes, edges };
 };
 
-const cfGraphDataFourNodesLC = (L: lineData, R: lineData, LC: lineData, TRG: lineData, lColor: string, rColor: string) => {
+const cfGraphDataFourNodesLC = (L: lineData, R: lineData, LC: lineData, CF: lineData, lColor: string, rColor: string) => {
   const nodes = [
     {
       key: "0",
@@ -415,10 +414,10 @@ const cfGraphDataFourNodesLC = (L: lineData, R: lineData, LC: lineData, TRG: lin
       attributes: {
         x: 2,
         y: -0.5,
-        label: `${getClassFromJavaFilename(TRG.file)}:${TRG.line}`,
-        method: `${getMethodNameFromJavaMethod(TRG.method)}`,
+        label: `${getClassFromJavaFilename(CF.file)}:${CF.line}`,
+        method: `${getMethodNameFromJavaMethod(CF.method)}`,
         size: NODE_SIZE,
-        color: TRG_CF_COLOR,
+        color: CF_COLOR,
         labelPosition: "right"
       }
     }

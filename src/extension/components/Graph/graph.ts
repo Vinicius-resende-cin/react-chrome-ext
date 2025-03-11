@@ -13,7 +13,7 @@ type OAlineData = {
   R: lineData;
   LC: lineData;
   RC: lineData;
-  TRG?: lineData;
+  CF?: lineData;
 };
 
 type OAoptions = {
@@ -31,14 +31,14 @@ const generateGraphData = (
   const R = data["R"];
   const LC = data["LC"];
   const RC = data["RC"];
-  const TRG = "TRG" in data ? data["TRG"] : undefined; 
+  const CF = "CF" in data ? data["CF"] : undefined; 
 
   if (conflictType === "oa") {
     return generateOAGraphData(L, R, LC, RC, lColor, rColor, options?.variables ?? undefined);
   } else if (conflictType === "df") {
     return generateDFGraphData(L, R, LC, RC, lColor, rColor, options?.variables ?? undefined);
-  } else if (conflictType === "cf" && TRG) { 
-    return generateCFGraphData(L, R, LC, RC, TRG, lColor, rColor);
+  } else if (conflictType === "cf" && CF) { 
+    return generateCFGraphData(L, R, LC, RC, CF, lColor, rColor);
   } else {
     throw new Error("Conflict type not supported");
   }
