@@ -239,7 +239,6 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
   const loadGraph = useLoadGraph();
   const setSettings = useSetSettings();
   const registerEvents = useRegisterEvents();
-
   // custom reset zoom method
   const resetCamera = useCallback(
     (options?: Partial<AnimateOptions>) => {
@@ -281,7 +280,7 @@ const LoadGraph = ({ data }: { data: Partial<SerializedGraph> }) => {
     loadGraph(graph);
     resetCamera();
   }, [data, loadGraph, resetCamera]);
-
+  console.log("procurando problema")
   return null;
 };
 

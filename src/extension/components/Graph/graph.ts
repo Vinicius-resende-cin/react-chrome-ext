@@ -1,5 +1,6 @@
 import { generateDFGraphData } from "./dfFunctions";
 import { generateOAGraphData } from "./oaFunctions";
+import { generateCFGraphData } from "./cfFunctions";
 
 type lineData = {
   file: string;
@@ -12,6 +13,7 @@ type OAlineData = {
   R: lineData;
   LC: lineData;
   RC: lineData;
+  CF?: lineData;
 };
 
 type OAoptions = {
@@ -29,11 +31,14 @@ const generateGraphData = (
   const R = data["R"];
   const LC = data["LC"];
   const RC = data["RC"];
+  const CF = "CF" in data ? data["CF"] : undefined; 
 
   if (conflictType === "oa") {
     return generateOAGraphData(L, R, LC, RC, lColor, rColor, options?.variables ?? undefined);
   } else if (conflictType === "df") {
     return generateDFGraphData(L, R, LC, RC, lColor, rColor, options?.variables ?? undefined);
+  } else if (conflictType === "cf" && CF) { 
+    return generateCFGraphData(L, R, LC, RC, CF, lColor, rColor);
   } else {
     throw new Error("Conflict type not supported");
   }
