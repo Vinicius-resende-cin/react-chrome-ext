@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AnalysisService from "../../services/AnalysisService";
 import { dependency, modLine } from "../../models/AnalysisOutput";
 import { filterDuplicatedDependencies, updateLocationFromStackTrace } from "./dependencies";
@@ -50,6 +50,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [baseClass, setBaseClass] = useState("");
   const [mainMethod, setMainMethod] = useState("");
   const [loading, setloading] = useState<boolean>(true);
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   /*
    * page properties
@@ -292,18 +294,28 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         );
         setDiff(response.getDiff());
         setModifiedLines(response.data.modifiedLines ?? []);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
       });
   };
 
     fetchAnalysis();
-    const intervalId = setInterval(fetchAnalysis, 30000); 
+    if (loading) {
+      intervalRef.current = setInterval(fetchAnalysis, 3000);
+    }
     // get the settings
     getSettings(owner, repository, pull_number).then((response) => {
       setMainClass(response.mainClass);
       setMainMethod(response.mainMethod);
       setBaseClass(response.baseClass ?? "");
-    });
-    return () => clearInterval(intervalId);
+    }); 
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [owner, repository, pull_number]);
 
   // update the active conflict
