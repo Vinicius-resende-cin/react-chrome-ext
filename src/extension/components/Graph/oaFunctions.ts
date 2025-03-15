@@ -97,7 +97,7 @@ const oaGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
         x: 1,
         y: 0,
         label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
-        method: `${getMethodNameFromJavaMethod(L.method)}`,
+        method: `${getMethodNameFromJavaMethod(LC.method)}`,
         size: NODE_SIZE,
         color: LColor,
         labelPosition: "right"
@@ -109,7 +109,7 @@ const oaGraphDataFourNodes = (L: lineData, R: lineData, LC: lineData, RC: lineDa
         x: 1,
         y: -1,
         label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
-        method: `${getMethodNameFromJavaMethod(R.method)}`,
+        method: `${getMethodNameFromJavaMethod(RC.method)}`,
         size: NODE_SIZE,
         color: RColor,
         labelPosition: "right"
@@ -239,7 +239,7 @@ const oaGraphDataThreeNodesRC = (L: lineData, R: lineData, RC: lineData, LColor:
         x: 1,
         y: -1,
         label: `${getClassFromJavaFilename(RC.file)}:${RC.line}`,
-        method: `${getMethodNameFromJavaMethod(R.method)}`,
+        method: `${getMethodNameFromJavaMethod(RC.method)}`,
         size: NODE_SIZE,
         color: RColor,
         labelPosition: "right"
@@ -315,7 +315,7 @@ const oaGraphDataThreeNodesLC = (L: lineData, R: lineData, LC: lineData, LColor:
         x: 1,
         y: 0,
         label: `${getClassFromJavaFilename(LC.file)}:${LC.line}`,
-        method: `${getMethodNameFromJavaMethod(L.method)}`,
+        method: `${getMethodNameFromJavaMethod(LC.method)}`,
         size: NODE_SIZE,
         color: LColor,
         labelPosition: "right"
