@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import AnalysisService from "../../services/AnalysisService";
 import { dependency, modLine } from "../../models/AnalysisOutput";
-import { filterDuplicatedDependencies, updateLocationFromStackTrace } from "./dependencies";
+import { filterDuplicatedDependencies, updateLocationFromStackTrace, filterCFDependencies } from "./dependencies";
 import Conflict from "./Conflict";
 import DiffView from "./Diff/DiffView";
 import GraphView from "./Graph/GraphView";
@@ -66,7 +66,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
 
     // get the LC and RC
     dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
-
+  
     // get the filename and line numbers of the conflict
     let fileFrom; 
     let lineFrom;
@@ -277,6 +277,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             updateLocationFromStackTrace(dep, { inplace: true });
         });
         dependencies = filterDuplicatedDependencies(dependencies);
+        dependencies = filterCFDependencies(dependencies);
 
         setDependencies(
           dependencies.sort((a, b) => {

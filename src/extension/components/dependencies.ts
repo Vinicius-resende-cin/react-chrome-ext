@@ -22,6 +22,19 @@ const filterDuplicatedDependencies = (dependencies: dependency[]) => {
   return uniqueDependencies;
 };
 
+const filterCFDependencies = (dependencies: dependency[]) => {
+  const cfDependencies: dependency[] = [];
+  dependencies.forEach((dep) => {
+    if (
+        dep.body.interference[2].location.class !== "java.lang.Integer" 
+      ) {
+      cfDependencies.push(dep);
+    }
+  });
+
+  return cfDependencies;
+};
+
 const getLastValidNode = (stackTrace: tracedNode[], maxDepth: number) => {
   // get all the diff file elements
   let diffFiles: NodeListOf<Element> | Element[] | undefined = document
@@ -143,4 +156,4 @@ const updateLocationFromStackTrace = (dep: dependency, options?: { inplace?: boo
   }
 };
 
-export { filterDuplicatedDependencies, updateLocationFromStackTrace };
+export { filterDuplicatedDependencies, updateLocationFromStackTrace, filterCFDependencies };
