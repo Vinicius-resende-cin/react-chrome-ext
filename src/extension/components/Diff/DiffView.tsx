@@ -21,9 +21,10 @@ const diffConfig: Diff2HtmlConfig = {
 interface DiffViewProps {
   diff: string;
   modifiedLines: modLine[];
+  filesFromBase?: string[];
 }
 
-export default function DiffView({ diff, modifiedLines }: DiffViewProps) {
+export default function DiffView({ diff, modifiedLines, filesFromBase }: DiffViewProps) {
   const [isCollapsed, setIsCollapsed] = useState<{ [key: string]: boolean }>({}); // State to control if the code is collapsed or not
 
   // update the colors of the diff and collapse the context lines
@@ -78,13 +79,13 @@ export default function DiffView({ diff, modifiedLines }: DiffViewProps) {
     const addFileNameAsClass = () => {
       const diffContainer = document.getElementById("diff-container");
       const diffFiles = diffContainer?.querySelectorAll(".d2h-file-wrapper");
-  
+
       if (diffFiles) {
         diffFiles.forEach((diffFile) => {
           let fileName = diffFile.querySelector(".d2h-file-name")?.textContent?.trim();
-          
+
           if (fileName) {
-            fileName = getClassFromJavaFilename(fileName);  
+            fileName = getClassFromJavaFilename(fileName);
             diffFile.classList.add(`${fileName}`);
           }
         });
@@ -98,6 +99,13 @@ export default function DiffView({ diff, modifiedLines }: DiffViewProps) {
       diffFiles.forEach((diffFile) => {
         const lines = diffFile.querySelectorAll("tr");
         let linesAlreadyShown = new Set<number>();
+
+        // if file is from base, show all lines
+        const diffFileName = diffFile.querySelector(".d2h-file-name")!.textContent!;
+        if (filesFromBase?.includes(diffFileName)) {
+          lines.forEach((line) => line.classList.remove("d2h-d-none"));
+          return;
+        }
 
         //Checking the changed lines
         lines.forEach((line, index) => {
@@ -118,10 +126,26 @@ export default function DiffView({ diff, modifiedLines }: DiffViewProps) {
       });
     };
 
+    const processFilesFromBase = () => {
+      const diffContainer = document.getElementById("diff-container");
+      const diffFiles = diffContainer?.querySelectorAll(".d2h-file-wrapper");
+
+      if (diffFiles) {
+        diffFiles.forEach((diffFile) => {
+          const diffFileName = diffFile.querySelector(".d2h-file-name")!.textContent!;
+          if (filesFromBase?.includes(diffFileName)) {
+            const changedTag = diffFile.querySelector("span.d2h-changed-tag");
+            changedTag?.remove();
+          }
+        });
+      }
+    };
+
+    processFilesFromBase();
     updateDiffColors();
     addFileNameAsClass();
     collapsedViewed();
-  }, [modifiedLines]);
+  }, [modifiedLines, filesFromBase]);
 
   // adding the listingEventChange on input viewed
   useEffect(() => {

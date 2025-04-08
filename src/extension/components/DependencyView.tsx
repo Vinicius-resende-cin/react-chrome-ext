@@ -45,6 +45,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
   const [dependencies, setDependencies] = useState<dependency[]>([]);
   const [modifiedLines, setModifiedLines] = useState<modLine[]>([]);
   const [diff, setDiff] = useState<string>("");
+  const [filesFromBase, setFilesFromBase] = useState<string[]>([]);
   const [graphData, setGraphData] = useState<Partial<SerializedGraph> | null>(null);
   const [mainClass, setMainClass] = useState("");
   const [baseClass, setBaseClass] = useState("");
@@ -68,18 +69,17 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     dep = updateLocationFromStackTrace(dep, { inplace: false, mode: "deep" });
 
     // get the filename and line numbers of the conflict
-    let fileFrom; 
+    let fileFrom;
     let lineFrom;
     let fileTo;
     let lineTo;
     let cfFilename = "";
     let cfLine;
 
-    if (dep.type.startsWith("CONFLUENCE")){
-
-      let sourceOne = dep.body.interference.find(el => el.type == "source1");
-      let sourceTwo = dep.body.interference.find(el => el.type == "source2");
-      let confluence = dep.body.interference.find(el => el.type == "confluence");
+    if (dep.type.startsWith("CONFLUENCE")) {
+      let sourceOne = dep.body.interference.find((el) => el.type === "source1");
+      let sourceTwo = dep.body.interference.find((el) => el.type === "source2");
+      let confluence = dep.body.interference.find((el) => el.type === "confluence");
 
       if (!sourceOne || !sourceTwo || !confluence) {
         console.error("Erroe: Any interference of 'source' or 'confluence' type was founded");
@@ -92,16 +92,13 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       lineTo = sourceTwo; // line source 2
       cfFilename = confluence.location.file.replaceAll("\\", "/"); // filename targ
       cfLine = confluence; // line targ
-
     } else {
-
       fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
       lineFrom = dep.body.interference[0]; // first line
       fileTo = dep.body.interference[dep.body.interference.length - 1].location.file.replaceAll("\\", "/"); // last filename
       lineTo = dep.body.interference[dep.body.interference.length - 1]; // last line
-
     }
-    
+
     const LC = {
       file: fileFrom,
       line: lineFrom.location.line,
@@ -162,15 +159,15 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       newGraphData = generateGraphData("df", { L, R, LC, RC }, lColor, rColor, {
         variables: { left: variables[0], right: variables[1] }
       });
-    } else if (dep.type.startsWith("CONFLUENCE")){
+    } else if (dep.type.startsWith("CONFLUENCE")) {
       if (cfLine) {
         CF = {
           file: cfFilename,
           line: cfLine.location.line,
           method: cfLine.location.method
         };
-        newGraphData = generateGraphData("cf", {L, R, LC, RC, CF}, lColor, rColor);
-      }  
+        newGraphData = generateGraphData("cf", { L, R, LC, RC, CF }, lColor, rColor);
+      }
     }
 
     // set the new graph data
@@ -187,10 +184,10 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     let cfLine;
     let cfFileName = "";
 
-    if (dep.type.startsWith("CONFLUENCE")){
-      let sourceOne = dep.body.interference.find(el => el.type == "source1");
-      let sourceTwo = dep.body.interference.find(el => el.type == "source2");
-      let confluence = dep.body.interference.find(el => el.type == "confluence");
+    if (dep.type.startsWith("CONFLUENCE")) {
+      let sourceOne = dep.body.interference.find((el) => el.type === "source1");
+      let sourceTwo = dep.body.interference.find((el) => el.type === "source2");
+      let confluence = dep.body.interference.find((el) => el.type === "confluence");
 
       if (!sourceOne || !sourceTwo || !confluence) {
         console.error("Error: Any interference of 'source' or 'confluence' type was founded");
@@ -201,9 +198,8 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       lineFrom = sourceOne; // source1 line
       fileTo = sourceTwo.location.file.replaceAll("\\", "/"); // source2 filename
       lineTo = sourceTwo; // source2 line
-      cfLine = confluence; 
+      cfLine = confluence;
       cfFileName = confluence.location.file.replaceAll("\\", "/"); // confluence filename
-
     } else {
       fileFrom = dep.body.interference[0].location.file.replaceAll("\\", "/"); // first filename
       lineFrom = dep.body.interference[0]; // first line
@@ -221,7 +217,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
     }
 
     // declare the graph data variables
-    if ( dep.type.startsWith("CONFLUENCE") && cfLine){
+    if (dep.type.startsWith("CONFLUENCE") && cfLine) {
       let L: lineData = {
         file: fileFrom,
         line: lineFrom.location.line,
@@ -230,19 +226,14 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       let R: lineData = {
         file: fileTo,
         line: lineTo.location.line,
-        method:
-          dep.body.interference[1].stackTrace?.at(0)?.method ??
-          lineTo.location.method
+        method: dep.body.interference[1].stackTrace?.at(0)?.method ?? lineTo.location.method
       };
       let CF: lineData = {
         file: cfFileName,
         line: cfLine.location.line,
-        method:
-          cfLine.stackTrace?.at(0)?.method ??
-          lineTo.location.method
-      } 
+        method: cfLine.stackTrace?.at(0)?.method ?? lineTo.location.method
+      };
       updateGraph(dep, L, R, CF);
-
     } else {
       let L: lineData = {
         file: fileFrom,
@@ -252,18 +243,14 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       let R: lineData = {
         file: fileTo,
         line: lineTo.location.line,
-        method:
-          dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ??
-          lineTo.location.method
+        method: dep.body.interference[dep.body.interference.length - 1].stackTrace?.at(0)?.method ?? lineTo.location.method
       };
       updateGraph(dep, L, R);
     }
-    
   };
 
   // get the analysis output
   useEffect(() => {
-
     const fetchAnalysis = () => {
       getAnalysisOutput(owner, repository, pull_number).then((response) => {
         setloading(false);
@@ -292,14 +279,32 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
             return 0;
           })
         );
-        setDiff(response.getDiff());
+
+        const appendMissingFilesToDiff = (diff: string, missingFiles: { file: string; content: string }[]) => {
+          for (const { file, content } of missingFiles) {
+            const fileHeader = `diff --git a/${file} b/${file}\nindex 0000000..0000000 100644\n--- a/${file}\n+++ b/${file}\n`;
+            const contentSize = content.split("\n").length - 1;
+            const fileContent = `@@ -1,${contentSize} +1,${contentSize} @@\n${content
+              .split("\n")
+              .map((line) => " " + line)
+              .join("\n")}\n`;
+            diff += fileHeader + fileContent;
+          }
+          return diff;
+        };
+        let newDiff = response.getDiff();
+        const missingFiles: { file: string; content: string }[] = response.data.missingFiles ?? [];
+        newDiff = appendMissingFilesToDiff(newDiff, missingFiles);
+
+        setDiff(newDiff);
+        setFilesFromBase(missingFiles.map((file) => file.file));
         setModifiedLines(response.data.modifiedLines ?? []);
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
       });
-  };
+    };
 
     fetchAnalysis();
     if (loading) {
@@ -310,7 +315,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
       setMainClass(response.mainClass);
       setMainMethod(response.mainMethod);
       setBaseClass(response.baseClass ?? "");
-    }); 
+    });
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -335,54 +340,54 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         </div>
       ) : (
         <>
-        {diff ? (
-          <SettingsButton
-            baseClass={baseClass}
-            setBaseClass={setBaseClass}
-            mainClass={mainClass}
-            setMainClass={setMainClass}
-            mainMethod={mainMethod}
-            setMainMethod={setMainMethod}
-          />
-        ) : null}
-      <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
-        {dependencies.length ? (
-          <div
-            id="dependency-container"
-            className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
-            <h3 className="tw-mb-5 tw-text-red-600">
-              {dependencies.length} possible conflict
-              {dependencies.length > 1 ? "s" : ""} reported:
-            </h3>
-            <ul className="tw-list-none">
-              {dependencies.map((d, i) => {
-                return (
-                  <li>
-                    <Conflict key={i} index={i} dependency={d} setConflict={setActiveConflict} />
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ) : diff ? (
-          <div id="no-dependencies">
-            <p>No conflicts were found during the analysis</p>
-          </div>
-        ) : null}
+          {diff ? (
+            <SettingsButton
+              baseClass={baseClass}
+              setBaseClass={setBaseClass}
+              mainClass={mainClass}
+              setMainClass={setMainClass}
+              mainMethod={mainMethod}
+              setMainMethod={setMainMethod}
+            />
+          ) : null}
+          <div id="dependency-plugin-content" className="tw-flex tw-flex-row tw-justify-between">
+            {dependencies.length ? (
+              <div
+                id="dependency-container"
+                className="tw-min-w-fit tw-max-w-[20%] tw-h-fit tw-mr-5 tw-py-2 tw-px-3 tw-border tw-border-gray-700 tw-rounded">
+                <h3 className="tw-mb-5 tw-text-red-600">
+                  {dependencies.length} possible conflict
+                  {dependencies.length > 1 ? "s" : ""} reported:
+                </h3>
+                <ul className="tw-list-none">
+                  {dependencies.map((d, i) => {
+                    return (
+                      <li>
+                        <Conflict key={i} index={i} dependency={d} setConflict={setActiveConflict} />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ) : diff ? (
+              <div id="no-dependencies">
+                <p>No conflicts were found during the analysis</p>
+              </div>
+            ) : null}
 
-        {diff ? (
-          <div id="content-container" className="tw-w-full">
-            {graphData && <GraphView data={graphData} />}
-            <DiffView diff={diff} modifiedLines={modifiedLines} />
+            {diff ? (
+              <div id="content-container" className="tw-w-full">
+                {graphData && <GraphView data={graphData} />}
+                <DiffView diff={diff} modifiedLines={modifiedLines} filesFromBase={filesFromBase} />
+              </div>
+            ) : (
+              <div id="no-analysis" className="tw-mb-3">
+                <p>The analysis results were not found...</p>
+                <p>Please try again soon. If the problem persists, please contact support.</p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div id="no-analysis" className="tw-mb-3">
-            <p>The analysis results were not found...</p>
-            <p>Please try again soon. If the problem persists, please contact support.</p>
-          </div>
-        )}
-      </div>
-      </>
+        </>
       )}
     </div>
   );
