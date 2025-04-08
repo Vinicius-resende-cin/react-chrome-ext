@@ -59,7 +59,7 @@ const filterCFDependencies = (dependencies: dependency[]) => {
 const filterCFSubStack = (dependencies: dependency[]) => {
   return dependencies.filter((depA, indexA) => {
     const stackA = depA.body.interference[0].stackTrace;
-    if (!stackA) return true; // mantém se não tiver stackTrace
+    if (!stackA) return true; 
 
     return !dependencies.some((depB, indexB) => {
       if ((depA.body.interference[2].location.class != depB.body.interference[2].location.class) || (depA.body.interference[2].location.line != depB.body.interference[2].location.line)){
@@ -70,7 +70,7 @@ const filterCFSubStack = (dependencies: dependency[]) => {
       const stackB = depB.body.interference[0].stackTrace;
       if (!stackB) return false;
 
-      // Verifica se stackA está contida em stackB
+      
       return isSubStack(stackA, stackB);
     });
   });
