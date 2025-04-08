@@ -295,7 +295,7 @@ export default function DependencyView({ owner, repository, pull_number }: Depen
         let newDiff = response.getDiff();
         const missingFiles: { file: string; content: string }[] = response.data.missingFiles ?? [];
         newDiff = appendMissingFilesToDiff(newDiff, missingFiles);
-        console.log(newDiff);
+
         setDiff(newDiff);
         setFilesFromBase(missingFiles.map((file) => file.file));
         setModifiedLines(response.data.modifiedLines ?? []);
