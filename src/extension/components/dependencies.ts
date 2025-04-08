@@ -1,5 +1,26 @@
 import { dependency, tracedNode } from "../../models/AnalysisOutput";
 
+const isSubStack = (small: tracedNode[], big: tracedNode[]): boolean => {
+  if (small.length > big.length) return false;
+
+  for (let i = 0; i <= big.length - small.length; i++) {
+    let match = true;
+    for (let j = 0; j < small.length; j++) {
+      if (
+        small[j].class !== big[i + j].class ||
+        small[j].method !== big[i + j].method ||
+        small[j].line !== big[i + j].line
+      ) {
+        match = false;
+        break;
+      }
+    }
+    if (match) return true;
+  }
+
+  return false;
+};
+
 const filterDuplicatedDependencies = (dependencies: dependency[]) => {
   const uniqueDependencies: dependency[] = [];
   dependencies.forEach((dep) => {
@@ -33,6 +54,26 @@ const filterCFDependencies = (dependencies: dependency[]) => {
   });
 
   return cfDependencies;
+};
+
+const filterCFSubStack = (dependencies: dependency[]) => {
+  return dependencies.filter((depA, indexA) => {
+    const stackA = depA.body.interference[0].stackTrace;
+    if (!stackA) return true; // mantém se não tiver stackTrace
+
+    return !dependencies.some((depB, indexB) => {
+      if ((depA.body.interference[2].location.class != depB.body.interference[2].location.class) || (depA.body.interference[2].location.line != depB.body.interference[2].location.line)){
+        return false;
+      }
+      if (indexA === indexB) return false;
+
+      const stackB = depB.body.interference[0].stackTrace;
+      if (!stackB) return false;
+
+      // Verifica se stackA está contida em stackB
+      return isSubStack(stackA, stackB);
+    });
+  });
 };
 
 const getLastValidNode = (stackTrace: tracedNode[], maxDepth: number) => {
@@ -156,4 +197,4 @@ const updateLocationFromStackTrace = (dep: dependency, options?: { inplace?: boo
   }
 };
 
-export { filterDuplicatedDependencies, updateLocationFromStackTrace, filterCFDependencies };
+export { filterDuplicatedDependencies, updateLocationFromStackTrace, filterCFDependencies, filterCFSubStack };
