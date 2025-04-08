@@ -1,5 +1,26 @@
 import { dependency, tracedNode } from "../../models/AnalysisOutput";
 
+const isSubStack = (small: tracedNode[], big: tracedNode[]): boolean => {
+  if (small.length > big.length) return false;
+
+  for (let i = 0; i <= big.length - small.length; i++) {
+    let match = true;
+    for (let j = 0; j < small.length; j++) {
+      if (
+        small[j].class !== big[i + j].class ||
+        small[j].method !== big[i + j].method ||
+        small[j].line !== big[i + j].line
+      ) {
+        match = false;
+        break;
+      }
+    }
+    if (match) return true;
+  }
+
+  return false;
+};
+
 const filterDuplicatedDependencies = (dependencies: dependency[]) => {
   const uniqueDependencies: dependency[] = [];
   dependencies.forEach((dep) => {
@@ -20,6 +41,39 @@ const filterDuplicatedDependencies = (dependencies: dependency[]) => {
   });
 
   return uniqueDependencies;
+};
+
+const filterCFDependencies = (dependencies: dependency[]) => {
+  const cfDependencies: dependency[] = [];
+  dependencies.forEach((dep) => {
+    if (
+        dep.body.interference[2].location.class !== "java.lang.Integer" 
+      ) {
+      cfDependencies.push(dep);
+    }
+  });
+
+  return cfDependencies;
+};
+
+const filterCFSubStack = (dependencies: dependency[]) => {
+  return dependencies.filter((depA, indexA) => {
+    const stackA = depA.body.interference[0].stackTrace;
+    if (!stackA) return true; 
+
+    return !dependencies.some((depB, indexB) => {
+      if ((depA.body.interference[2].location.class != depB.body.interference[2].location.class) || (depA.body.interference[2].location.line != depB.body.interference[2].location.line)){
+        return false;
+      }
+      if (indexA === indexB) return false;
+
+      const stackB = depB.body.interference[0].stackTrace;
+      if (!stackB) return false;
+
+      
+      return isSubStack(stackA, stackB);
+    });
+  });
 };
 
 const getLastValidNode = (stackTrace: tracedNode[], maxDepth: number) => {
@@ -143,4 +197,4 @@ const updateLocationFromStackTrace = (dep: dependency, options?: { inplace?: boo
   }
 };
 
-export { filterDuplicatedDependencies, updateLocationFromStackTrace };
+export { filterDuplicatedDependencies, updateLocationFromStackTrace, filterCFDependencies, filterCFSubStack };
